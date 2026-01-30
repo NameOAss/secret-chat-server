@@ -2,10 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Update</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lite Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* ... (CSS ส่วน Theme Neon เดิมของคุณทั้งหมด ใส่ไว้ตรงนี้) ... */
+        /* --- CSS Theme (Neon Dark) --- */
         :root {
             --bg-color: #0f0f12; --container-bg: #18181b;
             --primary-color: #6366f1; --secondary-color: #8b5cf6;
@@ -13,23 +14,23 @@
             --incoming-bg: #27272a; --border-color: #3f3f46;
             --error-color: #ef4444;
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body { 
             background-color: var(--bg-color); color: var(--text-primary); 
-            font-family: 'Inter', sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; 
+            font-family: 'Inter', sans-serif;
+            height: 100dvh; /* ใช้ 100dvh เพื่อแก้ปัญหา Address bar ในมือถือ */
+            width: 100vw;
+            display: flex; justify-content: center; overflow: hidden; 
         }
 
-        /* --- 🔥 หน้าจอหลอก (Fake Screen) --- */
+        /* --- 🔥 หน้าจอหลอก (Panic Screen) --- */
         #fake-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #fff; /* สีพื้นหลังขาว */
-            color: #000;
-            z-index: 99999; /* อยู่บนสุด */
-            display: none; /* ซ่อนไว้ก่อน */
-            flex-direction: column; justify-content: center; align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fff; color: #000; z-index: 99999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
         }
-        .fake-content { text-align: center; }
         .spinner {
             border: 4px solid #f3f3f3; border-top: 4px solid #3498db;
             border-radius: 50%; width: 40px; height: 40px;
@@ -37,117 +38,218 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* ... (CSS เดิมที่เหลือของคุณ) ... */
+        /* Toast & Login */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; pointer-events: none; }
-        .toast { background: rgba(30, 30, 36, 0.95); border: 1px solid var(--border-color); color: white; padding: 12px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; }
+        .toast { background: rgba(30, 30, 36, 0.95); border: 1px solid var(--border-color); color: white; padding: 12px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; font-size: 0.9rem;}
         .toast.show { opacity: 1; }
         .toast.error { border-color: var(--error-color); color: var(--error-color); }
-        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .login-box { background: var(--container-bg); padding: 30px; border-radius: 20px; width: 300px; text-align: center; }
-        .login-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #333; border: none; color: white; border-radius: 5px; }
-        #login-btn { width: 100%; padding: 10px; background: var(--primary-color); border: none; color: white; border-radius: 5px; cursor: pointer; }
-        .app-container { width: 100%; max-width: 600px; display: none; flex-direction: column; height: 100%; background: var(--container-bg); }
-        header { padding: 15px; background: #111; display: flex; justify-content: space-between; align-items: center; }
-        #messages { flex-grow: 1; overflow-y: auto; padding: 20px; list-style: none; }
-        .message-box { padding: 10px; margin-bottom: 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word;}
-        .incoming { background: var(--incoming-bg); align-self: flex-start; }
-        .outgoing { background: var(--primary-color); align-self: flex-end; margin-left: auto; }
-        #form { display: flex; padding: 10px; background: #111; }
-        #input { flex-grow: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: white; }
-        .icon-btn { background: none; border: none; color: var(--primary-color); cursor: pointer; padding: 10px; }
-        #file-input { display: none; }
-        .chat-image { max-width: 100%; border-radius: 10px; }
+
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .login-box { width: 100%; max-width: 350px; background: var(--container-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); text-align: center; }
+        .login-input { width: 100%; padding: 15px; margin-bottom: 15px; background: #27272a; border: 1px solid var(--border-color); color: white; border-radius: 12px; outline: none; font-size: 1rem;}
+        #login-btn { width: 100%; padding: 15px; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); border: none; color: white; border-radius: 12px; font-weight: bold; font-size: 1.1rem;}
+
+        /* App Container */
+        .app-container { 
+            width: 100%; max-width: 600px; display: none; flex-direction: column; 
+            height: 100%; background: var(--container-bg); 
+            position: relative; /* สำคัญ */
+        }
+        
+        header { padding: 15px; background: #111; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        
+        #messages { 
+            flex-grow: 1; overflow-y: auto; padding: 15px; list-style: none; 
+            display: flex; flex-direction: column; gap: 10px;
+            /* ป้องกันการเลื่อนเกินขอบ */
+            overscroll-behavior: contain;
+        }
+        
+        .message-box { padding: 10px 15px; border-radius: 15px; max-width: 85%; word-wrap: break-word; font-size: 0.95rem; }
+        .incoming { background: var(--incoming-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .outgoing { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
+        .system-msg { align-self: center; font-size: 0.75rem; color: #666; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; }
+
+        /* 🔥 แก้ไข Input Area ให้ไม่ล้นจอ */
+        #form { 
+            display: flex; 
+            padding: 10px; 
+            background: #111; 
+            border-top: 1px solid var(--border-color); 
+            align-items: center;
+            gap: 8px;
+            width: 100%; /* บังคับความกว้าง */
+            flex-shrink: 0; /* ห้ามหด */
+        }
+        
+        #input { 
+            flex-grow: 1; /* ยืดเต็มพื้นที่ที่เหลือ */
+            padding: 12px 15px; 
+            border-radius: 25px; 
+            border: 1px solid var(--border-color); 
+            background: #27272a; 
+            color: white; 
+            outline: none; 
+            font-size: 1rem; /* ขนาด 16px ป้องกัน iOS ซูมเอง */
+            min-width: 0; /* สำคัญ: ป้องกัน input ดันจนล้น */
+        }
+        
+        .icon-btn { 
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); 
+            border: none; color: white; cursor: pointer; 
+            width: 45px; height: 45px; flex-shrink: 0; /* ห้ามปุ่มหด */
+            display: flex; justify-content: center; align-items: center; 
+            border-radius: 50%; 
+        }
+        
+        /* ลายน้ำ */
+        .watermark-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; overflow: hidden; opacity: 0.08; display: flex; flex-wrap: wrap; }
+        .watermark-text { width: 200px; height: 100px; display: flex; align-items: center; justify-content: center; transform: rotate(-45deg); color: #fff; font-weight: bold; font-size: 14px; text-align: center;}
+
     </style>
 </head>
 <body>
 
+    <div id="watermark-container" class="watermark-container"></div>
+    <div id="toast-container"></div>
+
     <div id="fake-screen">
-        <div class="fake-content">
-            <div class="spinner"></div>
-            <h2 style="color: #333;">Windows Update</h2>
-            <p style="color: #666;">Configuring updates 35% complete.<br>Don't turn off your computer.</p>
+        <div class="spinner"></div>
+        <h2 style="color: #333;">System Update</h2>
+        <p style="color: #666;">Do not turn off target.</p>
+    </div>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color: white; margin-bottom: 20px;">SECURE CHAT</h2>
+            <input id="username-input" class="login-input" placeholder="Codename" autocomplete="off">
+            <input id="room-input" class="login-input" placeholder="Room ID" autocomplete="off">
+            <input id="password-input" class="login-input" type="password" placeholder="Password" autocomplete="off">
+            <button id="login-btn">ENTER ROOM</button>
         </div>
     </div>
 
-    <div id="toast-container"></div>
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 style="color: white; margin-bottom: 20px;">SYSTEM LOGIN</h2>
-            <input id="username-input" class="login-input" placeholder="User" autocomplete="off">
-            <input id="room-input" class="login-input" placeholder="ID" autocomplete="off">
-            <input id="password-input" class="login-input" type="password" placeholder="Key" autocomplete="off">
-            <button id="login-btn">CONNECT</button>
-        </div>
-    </div>
     <div class="app-container" id="app">
         <header>
             <span id="room-display" style="color: white; font-weight: bold;">LOBBY</span>
             <span style="font-size: 0.8rem; color: #aaa;">🟢 Online</span>
         </header>
+        
         <ul id="messages"></ul>
+        
         <form id="form" action="">
-            <button type="button" class="icon-btn" onclick="document.getElementById('file-input').click()">📷</button>
-            <input type="file" id="file-input" accept="image/*">
-            <input id="input" autocomplete="off" placeholder="Type..." />
-            <button class="icon-btn" id="send-btn">➤</button>
+            <input id="input" autocomplete="off" placeholder="Type a message..." />
+            <button class="icon-btn" id="send-btn">
+                <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </button>
         </form>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
-        // ... (ตัวแปรเดิม) ...
+        var myUsername = "";
+        
+        // --- 1. การตั้งค่า UI ---
         var fakeScreen = document.getElementById('fake-screen');
+        var loginScreen = document.getElementById('login-screen');
+        var appScreen = document.getElementById('app');
+        var messages = document.getElementById('messages');
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+        var roomDisplay = document.getElementById('room-display');
 
-        // --- 🔥 ระบบ Panic Button (กด ESC สลับจอ) ---
+        // --- 2. Panic Button (ESC / F2) ---
         document.addEventListener('keydown', function(event) {
-            // กดปุ่ม ESC หรือ F2
             if (event.key === "Escape" || event.key === "F2") {
                 if (fakeScreen.style.display === "flex") {
-                    fakeScreen.style.display = "none"; // กลับมาหน้าแชท
-                    document.title = "System Login";
+                    fakeScreen.style.display = "none";
+                    document.title = "Lite Chat";
                 } else {
-                    fakeScreen.style.display = "flex"; // เปิดหน้าหลอก
-                    document.title = "Windows Update"; // เปลี่ยนชื่อ Tab หลอกด้วย
+                    fakeScreen.style.display = "flex";
+                    document.title = "System Update";
                 }
             }
         });
 
-        // ... (Script ส่วนอื่นๆ ของคุณ ใส่ต่อได้เลยเหมือนเดิม) ...
-        var loginBtn = document.getElementById('login-btn');
-        var usernameInput = document.getElementById('username-input');
-        var roomInput = document.getElementById('room-input');
-        var passwordInput = document.getElementById('password-input');
-        var appScreen = document.getElementById('app');
-        var loginScreen = document.getElementById('login-screen');
-        var messages = document.getElementById('messages');
-        var form = document.getElementById('form');
-        var input = document.getElementById('input');
-        var fileInput = document.getElementById('file-input');
-        var myUsername = "";
+        // --- 3. ฟังก์ชันแจ้งเตือน (Toast) ---
+        function showToast(msg, isError) {
+            var t = document.createElement('div');
+            t.className = 'toast ' + (isError ? 'error' : '');
+            t.innerText = msg;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.classList.add('show'), 10);
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
+        }
 
-        loginBtn.addEventListener('click', function() {
-            if (usernameInput.value && roomInput.value) {
-                myUsername = usernameInput.value;
-                socket.emit('join room', { username: myUsername, room: roomInput.value, password: passwordInput.value });
+        // --- 4. ฟังก์ชันสร้างลายน้ำ + IP ---
+        socket.on('set watermark', function(data) {
+            const container = document.getElementById('watermark-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 30; i++) {
+                const div = document.createElement('div');
+                div.className = 'watermark-text';
+                div.innerHTML = data.user + "<br>" + (data.ip || '');
+                container.appendChild(div);
+            }
+        });
+
+        // --- 5. การทำงานหลัก ---
+        document.getElementById('login-btn').addEventListener('click', function() {
+            var u = document.getElementById('username-input').value;
+            var r = document.getElementById('room-input').value;
+            var p = document.getElementById('password-input').value;
+            if(u && r) {
+                myUsername = u;
+                socket.emit('join room', { username: u, room: r, password: p });
+            } else {
+                showToast("⚠️ กรุณาใส่ชื่อและห้อง", true);
             }
         });
 
         socket.on('system message', function(msg) {
             loginScreen.style.display = 'none'; appScreen.style.display = 'flex';
-            var item = document.createElement('li'); item.style.textAlign = 'center'; item.innerText = msg; messages.appendChild(item);
+            roomDisplay.innerText = document.getElementById('room-input').value;
+            var item = document.createElement('li');
+            item.className = 'system-msg'; item.innerText = msg;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
         });
+
+        socket.on('error', function(err) { showToast(err, true); });
+
+        // Linkify Function
+        function makeLink(text) {
+            var urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, function(url) {
+                return '<a href="' + url + '" target="_blank" style="color:#38bdf8;text-decoration:underline;">' + url + '</a>';
+            });
+        }
 
         socket.on('chat message', function(data) {
-           var item = document.createElement('li');
-           item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
-           if(data.type === 'image') { item.innerHTML = `<b>${data.user}</b><br><img src="${data.img}" class="chat-image">`; } 
-           else { item.innerHTML = `<b>${data.user}</b><br>${data.msg}`; }
-           messages.appendChild(item);
+            var item = document.createElement('li');
+            item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
+            
+            // แสดงเฉพาะข้อความ (เพราะเราตัดรูปออกแล้วในหน้านี้)
+            if (data.type === 'text') {
+                 item.innerHTML = `<div style="font-size:0.75rem;opacity:0.8;margin-bottom:2px;">${data.user}</div>` + makeLink(data.msg) + `<div style="font-size:0.6rem;opacity:0.5;text-align:right;margin-top:5px;">${data.time}</div>`;
+                 messages.appendChild(item);
+                 messages.scrollTop = messages.scrollHeight;
+            }
         });
 
-        form.addEventListener('submit', function(e) { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
-        fileInput.addEventListener('change', function() { /* โค้ดส่งรูปเดิม */ });
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value);
+                input.value = '';
+                // ป้องกัน Keyboard บังจอในมือถือบางรุ่น
+                setTimeout(() => input.focus(), 10); 
+            }
+        });
+
+        // ป้องกันคลิกขวา
+        document.addEventListener('contextmenu', event => event.preventDefault());
     </script>
 </body>
 </html>
