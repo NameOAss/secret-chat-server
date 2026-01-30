@@ -1,145 +1,221 @@
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Secret Chat</title>
-                <style>
-                    /* --- CSS ตกแต่ง --- */
-                    * { box-sizing: border-box; margin: 0; padding: 0; }
-                    body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Secret Chat</title>
+    <style>
+        /* --- CSS ตกแต่ง --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
 
-                    /* หน้า Login (แก้ไขให้สวยและพอดีคำ) */
-                    #login-screen {
-                        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-                        background: #000; z-index: 100;
-                        display: flex; flex-direction: column; justify-content: center; align-items: center;
-                        padding: 20px;
-                    }
+        /* หน้า Login (อัปเกรด) */
+        #login-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 20px;
+        }
+        .login-box { width: 100%; max-width: 350px; text-align: center; }
+        .login-input { 
+            width: 100%; padding: 15px; border-radius: 10px; 
+            border: 1px solid #333; background: #222; color: #fff; 
+            margin-bottom: 10px; font-size: 1rem; outline: none; transition: 0.3s;
+        }
+        .login-input:focus { border-color: #00C853; }
+        #login-btn { 
+            width: 100%; padding: 15px; border-radius: 50px; 
+            background: #00C853; border: none; color: #000; 
+            font-weight: bold; cursor: pointer; font-size: 1.1rem; margin-top: 10px;
+        }
 
-                    #login-box {
-                        width: 100%; max-width: 320px;
-                        display: flex; flex-direction: column; align-items: center;
-                    }
+        /* ส่วนแชท */
+        .app-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; height: 100%; display: none; background: #1a1a1a; }
+        
+        header { 
+            background-color: #111; padding: 15px; font-weight: bold; 
+            border-bottom: 1px solid #333; z-index: 10; 
+            display: flex; justify-content: space-between; align-items: center; color: #00C853;
+        }
+        
+        #messages { list-style-type: none; flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* กล่องข้อความ */
+        .message-box { max-width: 80%; padding: 10px 15px; border-radius: 15px; position: relative; font-size: 0.95rem; word-wrap: break-word; }
+        .message-info { font-size: 0.75rem; margin-bottom: 4px; opacity: 0.8; font-weight: bold; }
+        .message-time { font-size: 0.65rem; opacity: 0.5; text-align: right; margin-top: 5px; }
+        
+        /* รูปภาพในแชท */
+        .chat-image { max-width: 100%; border-radius: 10px; margin-top: 5px; border: 1px solid #444; }
 
-                    #login-input { 
-                        width: 100%; padding: 15px; border-radius: 50px; 
-                        border: 2px solid #00C853; background: #222; color: #fff; 
-                        text-align: center; margin-bottom: 20px; font-size: 1.1rem; outline: none;
-                    }
+        .incoming { align-self: flex-start; background-color: #2c2c2c; color: #fff; border-bottom-left-radius: 2px; }
+        .incoming .message-info { color: #00C853; }
+        .outgoing { align-self: flex-end; background-color: #005c26; color: #fff; border-bottom-right-radius: 2px; }
+        .outgoing .message-info { display: none; }
+        
+        .system-msg { align-self: center; background: rgba(255, 255, 255, 0.1); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; color: #aaa; }
 
-                    #login-btn { 
-                        width: 50%; padding: 12px; border-radius: 50px; 
-                        background: #00C853; border: none; color: #000; 
-                        font-weight: bold; cursor: pointer; font-size: 1rem; 
-                        box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4);
-                    }
+        /* แถบพิมพ์ข้อความ */
+        #form { background: #111; padding: 10px; display: flex; align-items: center; border-top: 1px solid #333; gap: 10px; }
+        input { border: none; padding: 12px 15px; border-radius: 25px; flex-grow: 1; background-color: #333; color: white; outline: none; font-size: 16px; }
+        
+        /* ปุ่มส่ง & ปุ่มรูป */
+        .icon-btn { 
+            background: none; border: none; color: #00C853; 
+            cursor: pointer; width: 40px; height: 40px; 
+            display: flex; justify-content: center; align-items: center; border-radius: 50%; 
+            transition: background 0.2s;
+        }
+        .icon-btn:hover { background: #222; }
+        .icon-btn svg { width: 24px; height: 24px; fill: currentColor; }
+        
+        #send-btn { background: #00C853; color: #000; }
+        #send-btn svg { fill: #000; }
 
-                    /* ส่วนแชท */
-                    .app-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; height: 100%; display: none; }
-                    header { background-color: #1e1e1e; padding: 15px; text-align: center; font-weight: bold; border-bottom: 1px solid #333; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
-                    .status-dot { height: 10px; width: 10px; background-color: #00C853; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #00C853; }
+        /* ซ่อน Input ไฟล์ */
+        #file-input { display: none; }
 
-                    #messages { list-style-type: none; flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #121212; }
+    </style>
+</head>
+<body>
 
-                    .message-box { max-width: 75%; padding: 10px 15px; border-radius: 20px; position: relative; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
-                    .message-info { font-size: 0.7rem; margin-bottom: 4px; opacity: 0.7; }
-                    .message-time { font-size: 0.65rem; opacity: 0.5; text-align: right; margin-top: 5px; }
+    <div id="login-screen">
+        <h2 style="color: #00C853; margin-bottom: 20px; letter-spacing: 2px;">SECURE ENTRY</h2>
+        <div class="login-box">
+            <input id="username-input" class="login-input" placeholder="Codename (ชื่อเล่น)" autocomplete="off">
+            <input id="room-input" class="login-input" placeholder="Room Name (ชื่อห้อง)" autocomplete="off">
+            <input id="password-input" class="login-input" type="password" placeholder="Room Password (รหัสห้อง)" autocomplete="off">
+            <button id="login-btn">ENTER ROOM</button>
+        </div>
+        <p style="color: #666; font-size: 0.8rem; margin-top: 20px;">*ห้องใหม่จะถูกสร้างอัตโนมัติพร้อมรหัสผ่านนี้</p>
+    </div>
 
-                    .incoming { align-self: flex-start; background-color: #2c2c2c; color: #fff; border-bottom-left-radius: 5px; }
-                    .incoming .message-info { color: #00C853; }
-                    .outgoing { align-self: flex-end; background-color: #005c26; color: #fff; border-bottom-right-radius: 5px; }
-                    .outgoing .message-info { display: none; }
+    <div class="app-container" id="app">
+        <header>
+            <span id="room-display">LOBBY</span>
+            <span style="font-size: 0.8rem; opacity: 0.7;">🟢 Online</span>
+        </header>
+        
+        <ul id="messages"></ul>
+        
+        <form id="form" action="">
+            <button type="button" class="icon-btn" onclick="document.getElementById('file-input').click()">
+                <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+            </button>
+            <input type="file" id="file-input" accept="image/*">
 
-                    #form { background: #1e1e1e; padding: 15px; display: flex; align-items: center; border-top: 1px solid #333; }
-                    input { border: none; padding: 12px 20px; border-radius: 30px; flex-grow: 1; margin-right: 10px; background-color: #333; color: white; outline: none; font-size: 16px; }
-                    button { background: #00C853; color: white; border: none; padding: 12px; border-radius: 50%; cursor: pointer; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; }
-                    button svg { width: 20px; height: 20px; fill: #000; transform: translateX(2px); }
+            <input id="input" autocomplete="off" placeholder="Message..." />
+            
+            <button class="icon-btn" id="send-btn">
+                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </button>
+        </form>
+    </div>
 
-                </style>
-            </head>
-            <body>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        var myUsername = "";
+        
+        // Login Elements
+        var loginScreen = document.getElementById('login-screen');
+        var usernameInput = document.getElementById('username-input');
+        var roomInput = document.getElementById('room-input');
+        var passwordInput = document.getElementById('password-input');
+        var loginBtn = document.getElementById('login-btn');
+        
+        // Chat Elements
+        var appScreen = document.getElementById('app');
+        var roomDisplay = document.getElementById('room-display');
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+        var fileInput = document.getElementById('file-input');
+        var messages = document.getElementById('messages');
 
-                <div id="login-screen">
-                    <h2 style="color: #00C853; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;">Identify Yourself</h2>
+        // ฟังก์ชันเข้าร่วมห้อง
+        function joinRoom() {
+            if (usernameInput.value && roomInput.value) {
+                myUsername = usernameInput.value;
+                var room = roomInput.value;
+                var pass = passwordInput.value;
 
-                    <div id="login-box">
-                        <input id="login-input" placeholder="Codename" autocomplete="off">
-                        <button id="login-btn">CONNECT</button>
-                    </div>
-                </div>
+                // ส่งข้อมูลไปขอ Server เข้าห้อง
+                socket.emit('join room', { username: myUsername, room: room, password: pass });
+            } else {
+                alert("กรุณาใส่ชื่อและชื่อห้อง");
+            }
+        }
 
-                <div class="app-container" id="app">
-                    <header>
-                        <span>SECRET CHANNEL</span>
-                        <span class="status-dot"></span>
-                    </header>
-                    <ul id="messages"></ul>
-                    <form id="form" action="">
-                        <input id="input" autocomplete="off" placeholder="Message..." />
-                        <button>
-                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-                        </button>
-                    </form>
-                </div>
+        loginBtn.addEventListener('click', joinRoom);
 
-                <script src="/socket.io/socket.io.js"></script>
-                <script>
-                    var socket = io();
-                    var myUsername = "";
+        // ถ้า Server บอกว่า Error (เช่น รหัสผิด)
+        socket.on('error', function(err) {
+            alert(err);
+            if(err.includes('ดีดออก')) location.reload(); // ถ้าโดนเตะ ให้รีเฟรชหน้า
+        });
 
-                    var loginScreen = document.getElementById('login-screen');
-                    var loginInput = document.getElementById('login-input');
-                    var loginBtn = document.getElementById('login-btn');
-                    var appScreen = document.getElementById('app');
-                    var form = document.getElementById('form');
-                    var input = document.getElementById('input');
-                    var messages = document.getElementById('messages');
+        // ถ้าเข้าห้องสำเร็จ (ได้รับข้อความระบบครั้งแรก)
+        socket.on('system message', function(msg) {
+            // ซ่อนหน้า Login โชว์หน้าแชท
+            loginScreen.style.display = 'none';
+            appScreen.style.display = 'flex';
+            roomDisplay.textContent = "🔒 " + roomInput.value;
 
-                    function login() {
-                        if (loginInput.value.trim() !== "") {
-                            myUsername = loginInput.value;
-                            loginScreen.style.display = 'none';
-                            appScreen.style.display = 'flex';
-                        } else {
-                            alert("Please enter a codename");
-                        }
-                    }
+            // แสดงข้อความระบบ
+            var item = document.createElement('li');
+            item.classList.add('system-msg');
+            item.textContent = msg;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight;
+        });
 
-                    loginBtn.addEventListener('click', login);
-                    loginInput.addEventListener('keypress', function (e) {
-                        if (e.key === 'Enter') login();
-                    });
+        // ส่งข้อความ
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value);
+                input.value = '';
+            }
+        });
 
-                    form.addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (input.value) {
-                            var data = {
-                                user: myUsername,
-                                msg: input.value,
-                                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                            };
-                            socket.emit('chat message', data);
-                            input.value = '';
-                        }
-                    });
+        // ส่งรูปภาพ (เมื่อเลือกไฟล์เสร็จ)
+        fileInput.addEventListener('change', function() {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // ส่งข้อมูลรูปภาพ (Base64) ไปให้ Server
+                    socket.emit('chat image', e.target.result);
+                };
+                reader.readAsDataURL(file); // แปลงรูปเป็นรหัสข้อความ
+                fileInput.value = ''; // ล้างค่า
+            }
+        });
 
-                    socket.on('chat message', function(data) {
-                        var item = document.createElement('li');
-                        item.classList.add('message-box');
-                        if (data.user === myUsername) {
-                            item.classList.add('outgoing');
-                        } else {
-                            item.classList.add('incoming');
-                        }
-                        item.innerHTML = `
-                            <div class="message-info">${data.user}</div>
-                            <div>${data.msg}</div>
-                            <div class="message-time">${data.time}</div>
-                        `;
-                        messages.appendChild(item);
-                        messages.scrollTop = messages.scrollHeight; 
-                    });
-                </script>
-            </body>
-            </html>
+        // รับข้อความ (ทั้ง Text และ Image)
+        socket.on('chat message', function(data) {
+            var item = document.createElement('li');
+            item.classList.add('message-box');
+            
+            if (data.user === myUsername) item.classList.add('outgoing');
+            else item.classList.add('incoming');
+
+            // ส่วนหัวข้อความ (ชื่อคนส่ง)
+            let contentHtml = `<div class="message-info">${data.user}</div>`;
+
+            // เช็คว่าเป็นข้อความ หรือ รูปภาพ
+            if (data.type === 'image') {
+                contentHtml += `<img src="${data.img}" class="chat-image">`;
+            } else {
+                contentHtml += `<div>${data.msg}</div>`;
+            }
+
+            contentHtml += `<div class="message-time">${data.time}</div>`;
+            item.innerHTML = contentHtml;
+            
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight; 
+        });
+    </script>
+</body>
+</html>
