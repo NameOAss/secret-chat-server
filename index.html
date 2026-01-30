@@ -1,0 +1,145 @@
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Secret Chat</title>
+                <style>
+                    /* --- CSS ตกแต่ง --- */
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    body { background-color: #121212; color: #e0e0e0; font-family: sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
+
+                    /* หน้า Login (แก้ไขให้สวยและพอดีคำ) */
+                    #login-screen {
+                        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                        background: #000; z-index: 100;
+                        display: flex; flex-direction: column; justify-content: center; align-items: center;
+                        padding: 20px;
+                    }
+
+                    #login-box {
+                        width: 100%; max-width: 320px;
+                        display: flex; flex-direction: column; align-items: center;
+                    }
+
+                    #login-input { 
+                        width: 100%; padding: 15px; border-radius: 50px; 
+                        border: 2px solid #00C853; background: #222; color: #fff; 
+                        text-align: center; margin-bottom: 20px; font-size: 1.1rem; outline: none;
+                    }
+
+                    #login-btn { 
+                        width: 50%; padding: 12px; border-radius: 50px; 
+                        background: #00C853; border: none; color: #000; 
+                        font-weight: bold; cursor: pointer; font-size: 1rem; 
+                        box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4);
+                    }
+
+                    /* ส่วนแชท */
+                    .app-container { width: 100%; max-width: 600px; display: flex; flex-direction: column; height: 100%; display: none; }
+                    header { background-color: #1e1e1e; padding: 15px; text-align: center; font-weight: bold; border-bottom: 1px solid #333; z-index: 10; display: flex; justify-content: space-between; align-items: center; }
+                    .status-dot { height: 10px; width: 10px; background-color: #00C853; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #00C853; }
+
+                    #messages { list-style-type: none; flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: #121212; }
+
+                    .message-box { max-width: 75%; padding: 10px 15px; border-radius: 20px; position: relative; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+                    .message-info { font-size: 0.7rem; margin-bottom: 4px; opacity: 0.7; }
+                    .message-time { font-size: 0.65rem; opacity: 0.5; text-align: right; margin-top: 5px; }
+
+                    .incoming { align-self: flex-start; background-color: #2c2c2c; color: #fff; border-bottom-left-radius: 5px; }
+                    .incoming .message-info { color: #00C853; }
+                    .outgoing { align-self: flex-end; background-color: #005c26; color: #fff; border-bottom-right-radius: 5px; }
+                    .outgoing .message-info { display: none; }
+
+                    #form { background: #1e1e1e; padding: 15px; display: flex; align-items: center; border-top: 1px solid #333; }
+                    input { border: none; padding: 12px 20px; border-radius: 30px; flex-grow: 1; margin-right: 10px; background-color: #333; color: white; outline: none; font-size: 16px; }
+                    button { background: #00C853; color: white; border: none; padding: 12px; border-radius: 50%; cursor: pointer; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; }
+                    button svg { width: 20px; height: 20px; fill: #000; transform: translateX(2px); }
+
+                </style>
+            </head>
+            <body>
+
+                <div id="login-screen">
+                    <h2 style="color: #00C853; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;">Identify Yourself</h2>
+
+                    <div id="login-box">
+                        <input id="login-input" placeholder="Codename" autocomplete="off">
+                        <button id="login-btn">CONNECT</button>
+                    </div>
+                </div>
+
+                <div class="app-container" id="app">
+                    <header>
+                        <span>SECRET CHANNEL</span>
+                        <span class="status-dot"></span>
+                    </header>
+                    <ul id="messages"></ul>
+                    <form id="form" action="">
+                        <input id="input" autocomplete="off" placeholder="Message..." />
+                        <button>
+                            <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                        </button>
+                    </form>
+                </div>
+
+                <script src="/socket.io/socket.io.js"></script>
+                <script>
+                    var socket = io();
+                    var myUsername = "";
+
+                    var loginScreen = document.getElementById('login-screen');
+                    var loginInput = document.getElementById('login-input');
+                    var loginBtn = document.getElementById('login-btn');
+                    var appScreen = document.getElementById('app');
+                    var form = document.getElementById('form');
+                    var input = document.getElementById('input');
+                    var messages = document.getElementById('messages');
+
+                    function login() {
+                        if (loginInput.value.trim() !== "") {
+                            myUsername = loginInput.value;
+                            loginScreen.style.display = 'none';
+                            appScreen.style.display = 'flex';
+                        } else {
+                            alert("Please enter a codename");
+                        }
+                    }
+
+                    loginBtn.addEventListener('click', login);
+                    loginInput.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') login();
+                    });
+
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        if (input.value) {
+                            var data = {
+                                user: myUsername,
+                                msg: input.value,
+                                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            };
+                            socket.emit('chat message', data);
+                            input.value = '';
+                        }
+                    });
+
+                    socket.on('chat message', function(data) {
+                        var item = document.createElement('li');
+                        item.classList.add('message-box');
+                        if (data.user === myUsername) {
+                            item.classList.add('outgoing');
+                        } else {
+                            item.classList.add('incoming');
+                        }
+                        item.innerHTML = `
+                            <div class="message-info">${data.user}</div>
+                            <div>${data.msg}</div>
+                            <div class="message-time">${data.time}</div>
+                        `;
+                        messages.appendChild(item);
+                        messages.scrollTop = messages.scrollHeight; 
+                    });
+                </script>
+            </body>
+            </html>
