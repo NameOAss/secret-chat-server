@@ -104,7 +104,7 @@
         var socket = io();
         var myUsername = "";
         
-        // --- 1. การตั้งค่า UI ---
+        // --- ตัวแปร UI ---
         var fakeScreen = document.getElementById('fake-screen');
         var loginScreen = document.getElementById('login-screen');
         var appScreen = document.getElementById('app');
@@ -116,52 +116,63 @@
         var roomInput = document.getElementById('room-input');
         var passwordInput = document.getElementById('password-input');
 
-        // --- 🔥 2. ระบบ Session Timeout 5 นาที 🔥 ---
-        
-        // กำหนดเวลา Timeout (5 นาที * 60 วินาที * 1000 มิลลิวินาที)
+        // กำหนดเวลา Timeout (5 นาที)
         const SESSION_TIMEOUT = 5 * 60 * 1000; 
 
-        // ตรวจสอบเมื่อโหลดหน้าเว็บ
-        var lastActiveTime = localStorage.getItem('last_active_time');
-        var currentTime = new Date().getTime();
+        // --- 🔥 ฟังก์ชันเช็คเวลาหมดอายุ (หัวใจสำคัญ) ---
+        function checkSessionTimeout() {
+            var lastActive = localStorage.getItem('last_active_time');
+            var now = new Date().getTime();
 
-        if (lastActiveTime && (currentTime - lastActiveTime > SESSION_TIMEOUT)) {
-            // ถ้าเกิน 5 นาที -> ล้างข้อมูลทิ้งให้หมด!
-            localStorage.removeItem('chat_username');
-            localStorage.removeItem('chat_room');
-            localStorage.removeItem('chat_password');
-            localStorage.removeItem('last_active_time');
-            showToast("⏳ หมดเวลาเข้าใช้งาน กรุณาล็อกอินใหม่");
-        } else {
-            // ถ้ายังไม่เกิน 5 นาที -> ดึงข้อมูลเดิมมาใส่
-            var savedUser = localStorage.getItem('chat_username');
-            var savedRoom = localStorage.getItem('chat_room');
-            var savedPass = localStorage.getItem('chat_password');
-
-            if (savedUser) usernameInput.value = savedUser;
-            if (savedRoom) roomInput.value = savedRoom;
-            if (savedPass) passwordInput.value = savedPass;
+            if (lastActive && (now - lastActive > SESSION_TIMEOUT)) {
+                // ถ้าหมดเวลา: ล้างข้อมูล + บังคับรีเฟรชหน้าจอ
+                localStorage.removeItem('chat_username');
+                localStorage.removeItem('chat_room');
+                localStorage.removeItem('chat_password');
+                localStorage.removeItem('last_active_time');
+                
+                // สั่งรีโหลดหน้าเว็บทันที เพื่อดีดกลับไปหน้า Login
+                window.location.reload(); 
+            }
         }
 
-        // เมื่อมีการปิดหน้าเว็บ หรือ รีเฟรช ให้บันทึกเวลาล่าสุดไว้
-        window.addEventListener("beforeunload", function() {
-            localStorage.setItem('last_active_time', new Date().getTime());
-        });
+        // 1. เช็คทันทีที่เปิดเว็บ (สำหรับ PC)
+        checkSessionTimeout();
 
-        // -----------------------------------------------------
-
-        // --- 3. Panic Button (ESC / F2) ---
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape" || event.key === "F2") {
-                if (fakeScreen.style.display === "flex") {
-                    fakeScreen.style.display = "none";
-                    document.title = "Lite Chat";
-                } else {
-                    fakeScreen.style.display = "flex";
-                    document.title = "System Update";
-                }
+        // 2. 🔥 เช็คทันทีที่ "สลับจอกลับมา" (สำหรับมือถือ)
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === 'visible') {
+                checkSessionTimeout();
+                // อัปเดตเวลาล่าสุดด้วย เพราะถือว่ากลับมาใช้งานแล้ว
+                localStorage.setItem('last_active_time', new Date().getTime());
             }
         });
+
+        // 3. ถ้ายังไม่หมดเวลา ให้เติมข้อมูลลงช่อง (Auto-Fill)
+        var savedUser = localStorage.getItem('chat_username');
+        var savedRoom = localStorage.getItem('chat_room');
+        var savedPass = localStorage.getItem('chat_password');
+        if (savedUser) usernameInput.value = savedUser;
+        if (savedRoom) roomInput.value = savedRoom;
+        if (savedPass) passwordInput.value = savedPass;
+
+
+        // --- Panic Button (ESC / F2) ---
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape" || event.key === "F2") {
+                toggleFakeScreen();
+            }
+        });
+
+        function toggleFakeScreen() {
+             if (fakeScreen.style.display === "flex") {
+                fakeScreen.style.display = "none";
+                document.title = "Lite Chat";
+            } else {
+                fakeScreen.style.display = "flex";
+                document.title = "System Update";
+            }
+        }
 
         function showToast(msg, isError) {
             var t = document.createElement('div');
@@ -183,19 +194,17 @@
             }
         });
 
-        // --- 4. การกดปุ่มเข้าห้อง ---
+        // --- ปุ่ม Login ---
         document.getElementById('login-btn').addEventListener('click', function() {
             var u = usernameInput.value;
             var r = roomInput.value;
             var p = passwordInput.value;
 
             if(u && r) {
-                // บันทึกข้อมูล
+                // บันทึกข้อมูล + เวลาล่าสุด
                 localStorage.setItem('chat_username', u);
                 localStorage.setItem('chat_room', r);
                 localStorage.setItem('chat_password', p);
-                
-                // อัปเดตเวลาล่าสุดทันทีที่กดเข้า
                 localStorage.setItem('last_active_time', new Date().getTime());
 
                 myUsername = u;
@@ -203,6 +212,11 @@
             } else {
                 showToast("⚠️ กรุณาใส่ชื่อและห้อง", true);
             }
+        });
+
+        // อัปเดตเวลาทุกครั้งที่พิมพ์ข้อความ (ถือว่ายังใช้งานอยู่)
+        input.addEventListener('input', function() {
+            localStorage.setItem('last_active_time', new Date().getTime());
         });
 
         socket.on('system message', function(msg) {
@@ -238,8 +252,14 @@
             if (input.value) {
                 socket.emit('chat message', input.value);
                 input.value = '';
+                localStorage.setItem('last_active_time', new Date().getTime()); // อัปเดตเวลาตอนกดส่ง
                 setTimeout(() => input.focus(), 10); 
             }
+        });
+
+        // บันทึกเวลาตอนปิดหน้าเว็บ (สำหรับ PC)
+        window.addEventListener("beforeunload", function() {
+            localStorage.setItem('last_active_time', new Date().getTime());
         });
 
         document.addEventListener('contextmenu', event => event.preventDefault());
