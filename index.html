@@ -20,12 +20,11 @@
         body { 
             background-color: var(--bg-color); color: var(--text-primary); 
             font-family: 'Inter', sans-serif;
-            height: 100dvh; /* ใช้ 100dvh เพื่อแก้ปัญหา Address bar ในมือถือ */
-            width: 100vw;
+            height: 100dvh; width: 100vw;
             display: flex; justify-content: center; overflow: hidden; 
         }
 
-        /* --- 🔥 หน้าจอหลอก (Panic Screen) --- */
+        /* --- Panic Screen --- */
         #fake-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #fff; color: #000; z-index: 99999;
@@ -38,7 +37,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Toast & Login */
+        /* UI Elements */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; pointer-events: none; }
         .toast { background: rgba(30, 30, 36, 0.95); border: 1px solid var(--border-color); color: white; padding: 12px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; font-size: 0.9rem;}
         .toast.show { opacity: 1; }
@@ -49,63 +48,20 @@
         .login-input { width: 100%; padding: 15px; margin-bottom: 15px; background: #27272a; border: 1px solid var(--border-color); color: white; border-radius: 12px; outline: none; font-size: 1rem;}
         #login-btn { width: 100%; padding: 15px; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); border: none; color: white; border-radius: 12px; font-weight: bold; font-size: 1.1rem;}
 
-        /* App Container */
-        .app-container { 
-            width: 100%; max-width: 600px; display: none; flex-direction: column; 
-            height: 100%; background: var(--container-bg); 
-            position: relative; /* สำคัญ */
-        }
-        
+        .app-container { width: 100%; max-width: 600px; display: none; flex-direction: column; height: 100%; background: var(--container-bg); position: relative; }
         header { padding: 15px; background: #111; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        
-        #messages { 
-            flex-grow: 1; overflow-y: auto; padding: 15px; list-style: none; 
-            display: flex; flex-direction: column; gap: 10px;
-            /* ป้องกันการเลื่อนเกินขอบ */
-            overscroll-behavior: contain;
-        }
-        
+        #messages { flex-grow: 1; overflow-y: auto; padding: 15px; list-style: none; display: flex; flex-direction: column; gap: 10px; overscroll-behavior: contain;}
         .message-box { padding: 10px 15px; border-radius: 15px; max-width: 85%; word-wrap: break-word; font-size: 0.95rem; }
         .incoming { background: var(--incoming-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
         .outgoing { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
         .system-msg { align-self: center; font-size: 0.75rem; color: #666; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; }
 
-        /* 🔥 แก้ไข Input Area ให้ไม่ล้นจอ */
-        #form { 
-            display: flex; 
-            padding: 10px; 
-            background: #111; 
-            border-top: 1px solid var(--border-color); 
-            align-items: center;
-            gap: 8px;
-            width: 100%; /* บังคับความกว้าง */
-            flex-shrink: 0; /* ห้ามหด */
-        }
+        #form { display: flex; padding: 10px; background: #111; border-top: 1px solid var(--border-color); align-items: center; gap: 8px; width: 100%; flex-shrink: 0; }
+        #input { flex-grow: 1; padding: 12px 15px; border-radius: 25px; border: 1px solid var(--border-color); background: #27272a; color: white; outline: none; font-size: 1rem; min-width: 0; }
+        .icon-btn { background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); border: none; color: white; cursor: pointer; width: 45px; height: 45px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; }
         
-        #input { 
-            flex-grow: 1; /* ยืดเต็มพื้นที่ที่เหลือ */
-            padding: 12px 15px; 
-            border-radius: 25px; 
-            border: 1px solid var(--border-color); 
-            background: #27272a; 
-            color: white; 
-            outline: none; 
-            font-size: 1rem; /* ขนาด 16px ป้องกัน iOS ซูมเอง */
-            min-width: 0; /* สำคัญ: ป้องกัน input ดันจนล้น */
-        }
-        
-        .icon-btn { 
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); 
-            border: none; color: white; cursor: pointer; 
-            width: 45px; height: 45px; flex-shrink: 0; /* ห้ามปุ่มหด */
-            display: flex; justify-content: center; align-items: center; 
-            border-radius: 50%; 
-        }
-        
-        /* ลายน้ำ */
         .watermark-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; overflow: hidden; opacity: 0.08; display: flex; flex-wrap: wrap; }
         .watermark-text { width: 200px; height: 100px; display: flex; align-items: center; justify-content: center; transform: rotate(-45deg); color: #fff; font-weight: bold; font-size: 14px; text-align: center;}
-
     </style>
 </head>
 <body>
@@ -134,9 +90,7 @@
             <span id="room-display" style="color: white; font-weight: bold;">LOBBY</span>
             <span style="font-size: 0.8rem; color: #aaa;">🟢 Online</span>
         </header>
-        
         <ul id="messages"></ul>
-        
         <form id="form" action="">
             <input id="input" autocomplete="off" placeholder="Type a message..." />
             <button class="icon-btn" id="send-btn">
@@ -158,8 +112,45 @@
         var form = document.getElementById('form');
         var input = document.getElementById('input');
         var roomDisplay = document.getElementById('room-display');
+        var usernameInput = document.getElementById('username-input');
+        var roomInput = document.getElementById('room-input');
+        var passwordInput = document.getElementById('password-input');
 
-        // --- 2. Panic Button (ESC / F2) ---
+        // --- 🔥 2. ระบบ Session Timeout 5 นาที 🔥 ---
+        
+        // กำหนดเวลา Timeout (5 นาที * 60 วินาที * 1000 มิลลิวินาที)
+        const SESSION_TIMEOUT = 5 * 60 * 1000; 
+
+        // ตรวจสอบเมื่อโหลดหน้าเว็บ
+        var lastActiveTime = localStorage.getItem('last_active_time');
+        var currentTime = new Date().getTime();
+
+        if (lastActiveTime && (currentTime - lastActiveTime > SESSION_TIMEOUT)) {
+            // ถ้าเกิน 5 นาที -> ล้างข้อมูลทิ้งให้หมด!
+            localStorage.removeItem('chat_username');
+            localStorage.removeItem('chat_room');
+            localStorage.removeItem('chat_password');
+            localStorage.removeItem('last_active_time');
+            showToast("⏳ หมดเวลาเข้าใช้งาน กรุณาล็อกอินใหม่");
+        } else {
+            // ถ้ายังไม่เกิน 5 นาที -> ดึงข้อมูลเดิมมาใส่
+            var savedUser = localStorage.getItem('chat_username');
+            var savedRoom = localStorage.getItem('chat_room');
+            var savedPass = localStorage.getItem('chat_password');
+
+            if (savedUser) usernameInput.value = savedUser;
+            if (savedRoom) roomInput.value = savedRoom;
+            if (savedPass) passwordInput.value = savedPass;
+        }
+
+        // เมื่อมีการปิดหน้าเว็บ หรือ รีเฟรช ให้บันทึกเวลาล่าสุดไว้
+        window.addEventListener("beforeunload", function() {
+            localStorage.setItem('last_active_time', new Date().getTime());
+        });
+
+        // -----------------------------------------------------
+
+        // --- 3. Panic Button (ESC / F2) ---
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape" || event.key === "F2") {
                 if (fakeScreen.style.display === "flex") {
@@ -172,7 +163,6 @@
             }
         });
 
-        // --- 3. ฟังก์ชันแจ้งเตือน (Toast) ---
         function showToast(msg, isError) {
             var t = document.createElement('div');
             t.className = 'toast ' + (isError ? 'error' : '');
@@ -182,7 +172,6 @@
             setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 3000);
         }
 
-        // --- 4. ฟังก์ชันสร้างลายน้ำ + IP ---
         socket.on('set watermark', function(data) {
             const container = document.getElementById('watermark-container');
             container.innerHTML = '';
@@ -194,12 +183,21 @@
             }
         });
 
-        // --- 5. การทำงานหลัก ---
+        // --- 4. การกดปุ่มเข้าห้อง ---
         document.getElementById('login-btn').addEventListener('click', function() {
-            var u = document.getElementById('username-input').value;
-            var r = document.getElementById('room-input').value;
-            var p = document.getElementById('password-input').value;
+            var u = usernameInput.value;
+            var r = roomInput.value;
+            var p = passwordInput.value;
+
             if(u && r) {
+                // บันทึกข้อมูล
+                localStorage.setItem('chat_username', u);
+                localStorage.setItem('chat_room', r);
+                localStorage.setItem('chat_password', p);
+                
+                // อัปเดตเวลาล่าสุดทันทีที่กดเข้า
+                localStorage.setItem('last_active_time', new Date().getTime());
+
                 myUsername = u;
                 socket.emit('join room', { username: u, room: r, password: p });
             } else {
@@ -209,7 +207,7 @@
 
         socket.on('system message', function(msg) {
             loginScreen.style.display = 'none'; appScreen.style.display = 'flex';
-            roomDisplay.innerText = document.getElementById('room-input').value;
+            roomDisplay.innerText = roomInput.value;
             var item = document.createElement('li');
             item.className = 'system-msg'; item.innerText = msg;
             messages.appendChild(item);
@@ -218,7 +216,6 @@
 
         socket.on('error', function(err) { showToast(err, true); });
 
-        // Linkify Function
         function makeLink(text) {
             var urlRegex = /(https?:\/\/[^\s]+)/g;
             return text.replace(urlRegex, function(url) {
@@ -229,8 +226,6 @@
         socket.on('chat message', function(data) {
             var item = document.createElement('li');
             item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
-            
-            // แสดงเฉพาะข้อความ (เพราะเราตัดรูปออกแล้วในหน้านี้)
             if (data.type === 'text') {
                  item.innerHTML = `<div style="font-size:0.75rem;opacity:0.8;margin-bottom:2px;">${data.user}</div>` + makeLink(data.msg) + `<div style="font-size:0.6rem;opacity:0.5;text-align:right;margin-top:5px;">${data.time}</div>`;
                  messages.appendChild(item);
@@ -243,12 +238,10 @@
             if (input.value) {
                 socket.emit('chat message', input.value);
                 input.value = '';
-                // ป้องกัน Keyboard บังจอในมือถือบางรุ่น
                 setTimeout(() => input.focus(), 10); 
             }
         });
 
-        // ป้องกันคลิกขวา
         document.addEventListener('contextmenu', event => event.preventDefault());
     </script>
 </body>
