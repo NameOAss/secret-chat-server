@@ -3,106 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Chat (Lite)</title>
+    <title>Neon Chat (Stable)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* --- ธีมสีใหม่ (แก้ไขง่ายๆ ตรงนี้) --- */
         :root {
-            --bg-color: #0f0f12; /* สีพื้นหลังหลัก */
-            --container-bg: #18181b; /* สีพื้นหลังกล่อง */
-            --primary-color: #6366f1; /* สีหลัก (Indigo) */
-            --secondary-color: #8b5cf6; /* สีรอง (Violet) */
-            --text-primary: #f3f4f6; /* สีตัวหนังสือหลัก */
-            --text-secondary: #9ca3af; /* สีตัวหนังสือรอง */
-            --incoming-bg: #27272a; /* สีกล่องข้อความคนอื่น */
-            --border-color: #3f3f46; /* สีเส้นขอบ */
+            --bg-color: #0f0f12;
+            --container-bg: #18181b;
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --incoming-bg: #27272a;
+            --border-color: #3f3f46;
+            --error-color: #ef4444; /* สีแดงสำหรับแจ้งเตือน */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             background-color: var(--bg-color); 
             color: var(--text-primary); 
-            font-family: 'Inter', sans-serif; /* ใช้ฟอนต์ใหม่ */
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            overflow: hidden; 
+            font-family: 'Inter', sans-serif;
+            height: 100vh; display: flex; justify-content: center; overflow: hidden; 
         }
 
-        /* --- หน้า Login (ดีไซน์ใหม่) --- */
+        /* --- Custom Toast Notification (ตัวแก้ปัญหา) --- */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 200; width: 90%; max-width: 400px;
+            pointer-events: none; /* เพื่อให้คลิกทะลุได้ถ้าไม่มีข้อความ */
+        }
+        .toast {
+            background: rgba(30, 30, 36, 0.95);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transform: translateY(-20px);
+            transition: 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { border-color: var(--error-color); color: var(--error-color); }
+
+        /* ... CSS เดิม ... */
         #login-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%); /* พื้นหลังไล่สี */
+            background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%);
             z-index: 100;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             padding: 20px;
         }
         .login-box { 
             width: 100%; max-width: 350px; text-align: center; 
-            background: var(--container-bg);
-            padding: 30px;
-            border-radius: 20px; /* มุมโค้งมนขึ้น */
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3); /* เงาดูมีมิติ */
+            background: var(--container-bg); padding: 30px;
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             border: 1px solid var(--border-color);
         }
         .login-title {
             margin-bottom: 25px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-            /* ทำให้ตัวหนังสือเป็นสีไล่ระดับ */
             background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .login-input { 
             width: 100%; padding: 15px; border-radius: 12px; 
             border: 1px solid var(--border-color); 
-            background: var(--input-bg); color: var(--text-primary); 
+            background: #27272a; color: var(--text-primary); 
             margin-bottom: 15px; font-size: 1rem; outline: none; transition: 0.3s;
         }
         .login-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
         #login-btn { 
             width: 100%; padding: 15px; border-radius: 12px; 
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); /* ปุ่มไล่สี */
-            border: none; color: white; 
-            font-weight: 600; cursor: pointer; font-size: 1.1rem; margin-top: 10px;
-            transition: opacity 0.2s;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); 
+            border: none; color: white; font-weight: 600; cursor: pointer; 
+            font-size: 1.1rem; margin-top: 10px; transition: opacity 0.2s;
         }
         #login-btn:hover { opacity: 0.9; }
 
-        /* --- ส่วนแชท (ดีไซน์ใหม่) --- */
         .app-container { 
-            width: 100%; max-width: 600px; 
-            display: flex; flex-direction: column; 
-            height: 100%; display: none; 
-            background: var(--container-bg);
+            width: 100%; max-width: 600px; display: flex; flex-direction: column; 
+            height: 100%; display: none; background: var(--container-bg);
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
         
         header { 
             background: linear-gradient(to right, var(--container-bg), #1f1f23);
             padding: 15px 20px; font-weight: 600; 
-            border-bottom: 1px solid var(--border-color); 
-            z-index: 10; 
+            border-bottom: 1px solid var(--border-color); z-index: 10; 
             display: flex; justify-content: space-between; align-items: center; color: var(--text-primary);
         }
         #room-display { font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-        #room-display::before { content: '#'; color: var(--primary-color); } /* ใส่ # หน้าชื่อห้อง */
+        #room-display::before { content: '#'; color: var(--primary-color); }
         
         #messages { 
-            list-style-type: none; flex-grow: 1; 
-            padding: 20px; overflow-y: auto; 
+            list-style-type: none; flex-grow: 1; padding: 20px; overflow-y: auto; 
             display: flex; flex-direction: column; gap: 12px; 
-            /* ลายพื้นหลังจุดๆ จางๆ */
             background-image: radial-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px);
             background-size: 20px 20px;
         }
         
-        /* กล่องข้อความ */
         .message-box { 
-            max-width: 80%; padding: 12px 16px; 
-            border-radius: 18px; position: relative; 
-            font-size: 0.95rem; word-wrap: break-word; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            animation: fadeIn 0.3s ease-out; /* อนิเมชั่นตอนข้อความเด้งขึ้น */
+            max-width: 80%; padding: 12px 16px; border-radius: 18px; 
+            position: relative; font-size: 0.95rem; word-wrap: break-word; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease-out;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -110,43 +115,34 @@
         .message-time { font-size: 0.65rem; opacity: 0.5; text-align: right; margin-top: 6px; }
         
         .incoming { 
-            align-self: flex-start; 
-            background-color: var(--incoming-bg); 
-            color: var(--text-primary); 
-            border-bottom-left-radius: 4px;
+            align-self: flex-start; background-color: var(--incoming-bg); 
+            color: var(--text-primary); border-bottom-left-radius: 4px;
         }
         .incoming .message-info { color: var(--primary-color); }
         
         .outgoing { 
             align-self: flex-end; 
-            /* กล่องข้อความเราเป็นสีไล่ระดับ */
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white; 
-            border-bottom-right-radius: 4px;
+            color: white; border-bottom-right-radius: 4px;
         }
         .outgoing .message-info { display: none; }
         .outgoing .message-time { color: rgba(255,255,255,0.7); }
         
         .system-msg { 
-            align-self: center; 
-            background: rgba(99, 102, 241, 0.1); 
+            align-self: center; background: rgba(99, 102, 241, 0.1); 
             padding: 6px 15px; border-radius: 20px; 
             font-size: 0.75rem; color: var(--text-secondary); 
             border: 1px solid rgba(99, 102, 241, 0.2);
         }
 
-        /* แถบพิมพ์ข้อความ */
         #form { 
-            background: var(--container-bg); 
-            padding: 15px; 
+            background: var(--container-bg); padding: 15px; 
             display: flex; align-items: center; 
-            border-top: 1px solid var(--border-color); 
-            gap: 10px; 
+            border-top: 1px solid var(--border-color); gap: 10px; 
         }
         input { 
-            border: 1px solid var(--border-color); 
-            padding: 12px 18px; border-radius: 25px; 
-            flex-grow: 1; background-color: #27272a; 
+            border: 1px solid var(--border-color); padding: 12px 18px; 
+            border-radius: 25px; flex-grow: 1; background-color: #27272a; 
             color: var(--text-primary); outline: none; font-size: 0.95rem; 
             transition: 0.3s;
         }
@@ -154,19 +150,19 @@
         
         .icon-btn { 
             background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); 
-            border: none; color: white; 
-            cursor: pointer; width: 45px; height: 45px; 
+            border: none; color: white; cursor: pointer; width: 45px; height: 45px; 
             display: flex; justify-content: center; align-items: center; border-radius: 50%; 
             transition: transform 0.2s, opacity 0.2s;
             box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
         }
         .icon-btn:hover { transform: scale(1.05); opacity: 0.9; }
-        .icon-btn:active { transform: scale(0.95); }
         .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
 
     </style>
 </head>
 <body>
+
+    <div id="toast-container"></div>
 
     <div id="login-screen">
         <div class="login-box">
@@ -208,12 +204,32 @@
         var roomInput = document.getElementById('room-input');
         var passwordInput = document.getElementById('password-input');
         var loginBtn = document.getElementById('login-btn');
+        var toastContainer = document.getElementById('toast-container'); // ตัวแจ้งเตือน
         
         var appScreen = document.getElementById('app');
         var roomDisplay = document.getElementById('room-display');
         var form = document.getElementById('form');
         var input = document.getElementById('input');
         var messages = document.getElementById('messages');
+
+        // --- ฟังก์ชันแจ้งเตือนแบบใหม่ (ไม่ใช้ alert แล้ว) ---
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.classList.add('toast');
+            if (isError) toast.classList.add('error');
+            toast.innerText = message;
+            
+            toastContainer.appendChild(toast);
+            
+            // ทำให้แสดงผล (ต้องรอแป๊บนึงเพื่อให้ transition ทำงาน)
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // ลบทิ้งหลังจาก 3 วินาที
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
         // Auto-Fill Login
         window.onload = function() {
@@ -236,24 +252,19 @@
 
                 socket.emit('join room', { username: myUsername, room: room, password: pass });
             } else {
-                alert("กรุณาใส่ชื่อและชื่อห้อง");
+                showToast("⚠️ กรุณาใส่ชื่อและชื่อห้อง", true); // เปลี่ยน alert เป็น showToast
             }
         }
 
         loginBtn.addEventListener('click', joinRoom);
 
-        // Load History
         socket.on('load history', function(historyData) {
             messages.innerHTML = ''; 
             historyData.forEach(function(data) {
                 renderMessage(data);
             });
             messages.scrollTop = messages.scrollHeight;
-            
-            var item = document.createElement('li');
-            item.classList.add('system-msg');
-            item.textContent = "--- โหลดประวัติแชทเรียบร้อย ---";
-            messages.appendChild(item);
+            showToast("📥 โหลดประวัติแชทเรียบร้อย");
         });
 
         function renderMessage(data) {
@@ -271,8 +282,10 @@
         }
 
         socket.on('error', function(err) {
-            alert(err);
-            if(err.includes('ดีดออก')) location.reload();
+            showToast("⛔ " + err, true); // เปลี่ยน alert เป็น showToast
+            if(err.includes('ดีดออก')) {
+                setTimeout(() => location.reload(), 2000); // รอ 2 วิค่อยรีโหลด
+            }
         });
 
         socket.on('system message', function(msg) {
