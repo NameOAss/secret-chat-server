@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Secret Chat</title>
+    <title>Super Secret Chat (Turbo)</title>
     <style>
-        /* --- CSS ตกแต่ง --- */
+        /* --- CSS ตกแต่ง (เหมือนเดิม) --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
 
-        /* หน้า Login (อัปเกรด) */
+        /* หน้า Login */
         #login-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 100;
@@ -72,7 +72,6 @@
         #send-btn { background: #00C853; color: #000; }
         #send-btn svg { fill: #000; }
 
-        /* ซ่อน Input ไฟล์ */
         #file-input { display: none; }
 
     </style>
@@ -87,7 +86,7 @@
             <input id="password-input" class="login-input" type="password" placeholder="Room Password (รหัสห้อง)" autocomplete="off">
             <button id="login-btn">ENTER ROOM</button>
         </div>
-        <p style="color: #666; font-size: 0.8rem; margin-top: 20px;">*ห้องใหม่จะถูกสร้างอัตโนมัติพร้อมรหัสผ่านนี้</p>
+        <p style="color: #666; font-size: 0.8rem; margin-top: 20px;">*ระบบจะย่อรูปอัตโนมัติเพื่อความเร็วสูงสุด</p>
     </div>
 
     <div class="app-container" id="app">
@@ -132,14 +131,11 @@
         var fileInput = document.getElementById('file-input');
         var messages = document.getElementById('messages');
 
-        // ฟังก์ชันเข้าร่วมห้อง
         function joinRoom() {
             if (usernameInput.value && roomInput.value) {
                 myUsername = usernameInput.value;
                 var room = roomInput.value;
                 var pass = passwordInput.value;
-
-                // ส่งข้อมูลไปขอ Server เข้าห้อง
                 socket.emit('join room', { username: myUsername, room: room, password: pass });
             } else {
                 alert("กรุณาใส่ชื่อและชื่อห้อง");
@@ -148,20 +144,16 @@
 
         loginBtn.addEventListener('click', joinRoom);
 
-        // ถ้า Server บอกว่า Error (เช่น รหัสผิด)
         socket.on('error', function(err) {
             alert(err);
-            if(err.includes('ดีดออก')) location.reload(); // ถ้าโดนเตะ ให้รีเฟรชหน้า
+            if(err.includes('ดีดออก')) location.reload();
         });
 
-        // ถ้าเข้าห้องสำเร็จ (ได้รับข้อความระบบครั้งแรก)
         socket.on('system message', function(msg) {
-            // ซ่อนหน้า Login โชว์หน้าแชท
             loginScreen.style.display = 'none';
             appScreen.style.display = 'flex';
             roomDisplay.textContent = "🔒 " + roomInput.value;
 
-            // แสดงข้อความระบบ
             var item = document.createElement('li');
             item.classList.add('system-msg');
             item.textContent = msg;
@@ -169,7 +161,6 @@
             messages.scrollTop = messages.scrollHeight;
         });
 
-        // ส่งข้อความ
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (input.value) {
@@ -178,21 +169,53 @@
             }
         });
 
-        // ส่งรูปภาพ (เมื่อเลือกไฟล์เสร็จ)
+        // --- ส่วนที่เพิ่มเข้ามา: ระบบย่อรูป (Image Compression) ---
         fileInput.addEventListener('change', function() {
             const file = fileInput.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // ส่งข้อมูลรูปภาพ (Base64) ไปให้ Server
-                    socket.emit('chat image', e.target.result);
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        // กำหนดขนาดสูงสุด (800px)
+                        const maxWidth = 800;
+                        const maxHeight = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        // คำนวณอัตราส่วนเพื่อรักษาทรงภาพ
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
+                        }
+
+                        // วาดรูปลงบน Canvas เพื่อย่อ
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // แปลงเป็น JPEG คุณภาพ 70% (ไฟล์จะเล็กลงมาก!)
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                        // ส่งข้อมูลแบบย่อแล้วไปให้ Server
+                        socket.emit('chat image', compressedDataUrl);
+                    };
                 };
-                reader.readAsDataURL(file); // แปลงรูปเป็นรหัสข้อความ
-                fileInput.value = ''; // ล้างค่า
+                reader.readAsDataURL(file);
+                fileInput.value = '';
             }
         });
 
-        // รับข้อความ (ทั้ง Text และ Image)
         socket.on('chat message', function(data) {
             var item = document.createElement('li');
             item.classList.add('message-box');
@@ -200,16 +223,12 @@
             if (data.user === myUsername) item.classList.add('outgoing');
             else item.classList.add('incoming');
 
-            // ส่วนหัวข้อความ (ชื่อคนส่ง)
             let contentHtml = `<div class="message-info">${data.user}</div>`;
-
-            // เช็คว่าเป็นข้อความ หรือ รูปภาพ
             if (data.type === 'image') {
                 contentHtml += `<img src="${data.img}" class="chat-image">`;
             } else {
-                contentHtml += `<div>${data.msg}</div>`;
+                contentHtml += <div>${data.msg}</div>;
             }
-
             contentHtml += `<div class="message-time">${data.time}</div>`;
             item.innerHTML = contentHtml;
             
