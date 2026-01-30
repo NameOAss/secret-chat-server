@@ -3,315 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon Chat (Stable)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>System Update</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* ... (CSS ส่วน Theme Neon เดิมของคุณทั้งหมด ใส่ไว้ตรงนี้) ... */
         :root {
-            --bg-color: #0f0f12;
-            --container-bg: #18181b;
-            --primary-color: #6366f1;
-            --secondary-color: #8b5cf6;
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            --incoming-bg: #27272a;
-            --border-color: #3f3f46;
-            --error-color: #ef4444; /* สีแดงสำหรับแจ้งเตือน */
+            --bg-color: #0f0f12; --container-bg: #18181b;
+            --primary-color: #6366f1; --secondary-color: #8b5cf6;
+            --text-primary: #f3f4f6; --text-secondary: #9ca3af;
+            --incoming-bg: #27272a; --border-color: #3f3f46;
+            --error-color: #ef4444;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            background-color: var(--bg-color); 
-            color: var(--text-primary); 
-            font-family: 'Inter', sans-serif;
-            height: 100vh; display: flex; justify-content: center; overflow: hidden; 
+            background-color: var(--bg-color); color: var(--text-primary); 
+            font-family: 'Inter', sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; 
         }
 
-        /* --- Custom Toast Notification (ตัวแก้ปัญหา) --- */
-        #toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 200; width: 90%; max-width: 400px;
-            pointer-events: none; /* เพื่อให้คลิกทะลุได้ถ้าไม่มีข้อความ */
+        /* --- 🔥 หน้าจอหลอก (Fake Screen) --- */
+        #fake-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #fff; /* สีพื้นหลังขาว */
+            color: #000;
+            z-index: 99999; /* อยู่บนสุด */
+            display: none; /* ซ่อนไว้ก่อน */
+            flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .toast {
-            background: rgba(30, 30, 36, 0.95);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 12px 20px;
-            margin-bottom: 10px;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            opacity: 0; transform: translateY(-20px);
-            transition: 0.3s ease;
-            font-size: 0.9rem;
+        .fake-content { text-align: center; }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #3498db;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto 20px auto;
         }
-        .toast.show { opacity: 1; transform: translateY(0); }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* ... (CSS เดิมที่เหลือของคุณ) ... */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; pointer-events: none; }
+        .toast { background: rgba(30, 30, 36, 0.95); border: 1px solid var(--border-color); color: white; padding: 12px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; }
+        .toast.show { opacity: 1; }
         .toast.error { border-color: var(--error-color); color: var(--error-color); }
-
-        /* ... CSS เดิม ... */
-        #login-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%);
-            z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            padding: 20px;
-        }
-        .login-box { 
-            width: 100%; max-width: 350px; text-align: center; 
-            background: var(--container-bg); padding: 30px;
-            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            border: 1px solid var(--border-color);
-        }
-        .login-title {
-            margin-bottom: 25px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .login-input { 
-            width: 100%; padding: 15px; border-radius: 12px; 
-            border: 1px solid var(--border-color); 
-            background: #27272a; color: var(--text-primary); 
-            margin-bottom: 15px; font-size: 1rem; outline: none; transition: 0.3s;
-        }
-        .login-input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
-        #login-btn { 
-            width: 100%; padding: 15px; border-radius: 12px; 
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); 
-            border: none; color: white; font-weight: 600; cursor: pointer; 
-            font-size: 1.1rem; margin-top: 10px; transition: opacity 0.2s;
-        }
-        #login-btn:hover { opacity: 0.9; }
-
-        .app-container { 
-            width: 100%; max-width: 600px; display: flex; flex-direction: column; 
-            height: 100%; display: none; background: var(--container-bg);
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-        }
-        
-        header { 
-            background: linear-gradient(to right, var(--container-bg), #1f1f23);
-            padding: 15px 20px; font-weight: 600; 
-            border-bottom: 1px solid var(--border-color); z-index: 10; 
-            display: flex; justify-content: space-between; align-items: center; color: var(--text-primary);
-        }
-        #room-display { font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-        #room-display::before { content: '#'; color: var(--primary-color); }
-        
-        #messages { 
-            list-style-type: none; flex-grow: 1; padding: 20px; overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 12px; 
-            background-image: radial-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .message-box { 
-            max-width: 80%; padding: 12px 16px; border-radius: 18px; 
-            position: relative; font-size: 0.95rem; word-wrap: break-word; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .message-info { font-size: 0.75rem; margin-bottom: 4px; opacity: 0.7; font-weight: 500; }
-        .message-time { font-size: 0.65rem; opacity: 0.5; text-align: right; margin-top: 6px; }
-        
-        .incoming { 
-            align-self: flex-start; background-color: var(--incoming-bg); 
-            color: var(--text-primary); border-bottom-left-radius: 4px;
-        }
-        .incoming .message-info { color: var(--primary-color); }
-        
-        .outgoing { 
-            align-self: flex-end; 
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white; border-bottom-right-radius: 4px;
-        }
-        .outgoing .message-info { display: none; }
-        .outgoing .message-time { color: rgba(255,255,255,0.7); }
-        
-        .system-msg { 
-            align-self: center; background: rgba(99, 102, 241, 0.1); 
-            padding: 6px 15px; border-radius: 20px; 
-            font-size: 0.75rem; color: var(--text-secondary); 
-            border: 1px solid rgba(99, 102, 241, 0.2);
-        }
-
-        #form { 
-            background: var(--container-bg); padding: 15px; 
-            display: flex; align-items: center; 
-            border-top: 1px solid var(--border-color); gap: 10px; 
-        }
-        input { 
-            border: 1px solid var(--border-color); padding: 12px 18px; 
-            border-radius: 25px; flex-grow: 1; background-color: #27272a; 
-            color: var(--text-primary); outline: none; font-size: 0.95rem; 
-            transition: 0.3s;
-        }
-        input:focus { border-color: var(--primary-color); }
-        
-        .icon-btn { 
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); 
-            border: none; color: white; cursor: pointer; width: 45px; height: 45px; 
-            display: flex; justify-content: center; align-items: center; border-radius: 50%; 
-            transition: transform 0.2s, opacity 0.2s;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-        }
-        .icon-btn:hover { transform: scale(1.05); opacity: 0.9; }
-        .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
-
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .login-box { background: var(--container-bg); padding: 30px; border-radius: 20px; width: 300px; text-align: center; }
+        .login-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #333; border: none; color: white; border-radius: 5px; }
+        #login-btn { width: 100%; padding: 10px; background: var(--primary-color); border: none; color: white; border-radius: 5px; cursor: pointer; }
+        .app-container { width: 100%; max-width: 600px; display: none; flex-direction: column; height: 100%; background: var(--container-bg); }
+        header { padding: 15px; background: #111; display: flex; justify-content: space-between; align-items: center; }
+        #messages { flex-grow: 1; overflow-y: auto; padding: 20px; list-style: none; }
+        .message-box { padding: 10px; margin-bottom: 10px; border-radius: 10px; max-width: 80%; word-wrap: break-word;}
+        .incoming { background: var(--incoming-bg); align-self: flex-start; }
+        .outgoing { background: var(--primary-color); align-self: flex-end; margin-left: auto; }
+        #form { display: flex; padding: 10px; background: #111; }
+        #input { flex-grow: 1; padding: 10px; border-radius: 20px; border: none; background: #333; color: white; }
+        .icon-btn { background: none; border: none; color: var(--primary-color); cursor: pointer; padding: 10px; }
+        #file-input { display: none; }
+        .chat-image { max-width: 100%; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
-
-    <div id="login-screen">
-        <div class="login-box">
-            <h2 class="login-title">NEON ENTRY</h2>
-            <input id="username-input" class="login-input" placeholder="Codename (ชื่อเล่น)" autocomplete="off">
-            <input id="room-input" class="login-input" placeholder="Room Name (ชื่อห้อง)" autocomplete="off">
-            <input id="password-input" class="login-input" type="password" placeholder="Room Password (รหัสห้อง)" autocomplete="off">
-            <button id="login-btn">ENTER ROOM</button>
-            <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 20px;">*Lite Version: ข้อความเท่านั้น</p>
+    <div id="fake-screen">
+        <div class="fake-content">
+            <div class="spinner"></div>
+            <h2 style="color: #333;">Windows Update</h2>
+            <p style="color: #666;">Configuring updates 35% complete.<br>Don't turn off your computer.</p>
         </div>
     </div>
 
+    <div id="toast-container"></div>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color: white; margin-bottom: 20px;">SYSTEM LOGIN</h2>
+            <input id="username-input" class="login-input" placeholder="User" autocomplete="off">
+            <input id="room-input" class="login-input" placeholder="ID" autocomplete="off">
+            <input id="password-input" class="login-input" type="password" placeholder="Key" autocomplete="off">
+            <button id="login-btn">CONNECT</button>
+        </div>
+    </div>
     <div class="app-container" id="app">
         <header>
-            <span id="room-display">LOBBY</span>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <span style="display: inline-block; width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 5px #10b981;"></span>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">Online</span>
-            </div>
+            <span id="room-display" style="color: white; font-weight: bold;">LOBBY</span>
+            <span style="font-size: 0.8rem; color: #aaa;">🟢 Online</span>
         </header>
-        
         <ul id="messages"></ul>
-        
         <form id="form" action="">
-            <input id="input" autocomplete="off" placeholder="Type a message..." />
-            <button class="icon-btn" id="send-btn">
-                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
+            <button type="button" class="icon-btn" onclick="document.getElementById('file-input').click()">📷</button>
+            <input type="file" id="file-input" accept="image/*">
+            <input id="input" autocomplete="off" placeholder="Type..." />
+            <button class="icon-btn" id="send-btn">➤</button>
         </form>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
-        var myUsername = "";
-        
-        var loginScreen = document.getElementById('login-screen');
+        // ... (ตัวแปรเดิม) ...
+        var fakeScreen = document.getElementById('fake-screen');
+
+        // --- 🔥 ระบบ Panic Button (กด ESC สลับจอ) ---
+        document.addEventListener('keydown', function(event) {
+            // กดปุ่ม ESC หรือ F2
+            if (event.key === "Escape" || event.key === "F2") {
+                if (fakeScreen.style.display === "flex") {
+                    fakeScreen.style.display = "none"; // กลับมาหน้าแชท
+                    document.title = "System Login";
+                } else {
+                    fakeScreen.style.display = "flex"; // เปิดหน้าหลอก
+                    document.title = "Windows Update"; // เปลี่ยนชื่อ Tab หลอกด้วย
+                }
+            }
+        });
+
+        // ... (Script ส่วนอื่นๆ ของคุณ ใส่ต่อได้เลยเหมือนเดิม) ...
+        var loginBtn = document.getElementById('login-btn');
         var usernameInput = document.getElementById('username-input');
         var roomInput = document.getElementById('room-input');
         var passwordInput = document.getElementById('password-input');
-        var loginBtn = document.getElementById('login-btn');
-        var toastContainer = document.getElementById('toast-container'); // ตัวแจ้งเตือน
-        
         var appScreen = document.getElementById('app');
-        var roomDisplay = document.getElementById('room-display');
+        var loginScreen = document.getElementById('login-screen');
+        var messages = document.getElementById('messages');
         var form = document.getElementById('form');
         var input = document.getElementById('input');
-        var messages = document.getElementById('messages');
+        var fileInput = document.getElementById('file-input');
+        var myUsername = "";
 
-        // --- ฟังก์ชันแจ้งเตือนแบบใหม่ (ไม่ใช้ alert แล้ว) ---
-        function showToast(message, isError = false) {
-            const toast = document.createElement('div');
-            toast.classList.add('toast');
-            if (isError) toast.classList.add('error');
-            toast.innerText = message;
-            
-            toastContainer.appendChild(toast);
-            
-            // ทำให้แสดงผล (ต้องรอแป๊บนึงเพื่อให้ transition ทำงาน)
-            setTimeout(() => toast.classList.add('show'), 10);
-
-            // ลบทิ้งหลังจาก 3 วินาที
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Auto-Fill Login
-        window.onload = function() {
-            if (localStorage.getItem('chat_username')) {
-                usernameInput.value = localStorage.getItem('chat_username');
-                roomInput.value = localStorage.getItem('chat_room');
-                passwordInput.value = localStorage.getItem('chat_password');
-            }
-        };
-
-        function joinRoom() {
+        loginBtn.addEventListener('click', function() {
             if (usernameInput.value && roomInput.value) {
                 myUsername = usernameInput.value;
-                var room = roomInput.value;
-                var pass = passwordInput.value;
-
-                localStorage.setItem('chat_username', myUsername);
-                localStorage.setItem('chat_room', room);
-                localStorage.setItem('chat_password', pass);
-
-                socket.emit('join room', { username: myUsername, room: room, password: pass });
-            } else {
-                showToast("⚠️ กรุณาใส่ชื่อและชื่อห้อง", true); // เปลี่ยน alert เป็น showToast
-            }
-        }
-
-        loginBtn.addEventListener('click', joinRoom);
-
-        socket.on('load history', function(historyData) {
-            messages.innerHTML = ''; 
-            historyData.forEach(function(data) {
-                renderMessage(data);
-            });
-            messages.scrollTop = messages.scrollHeight;
-            showToast("📥 โหลดประวัติแชทเรียบร้อย");
-        });
-
-        function renderMessage(data) {
-            var item = document.createElement('li');
-            item.classList.add('message-box');
-            
-            if (data.user === myUsername) item.classList.add('outgoing');
-            else item.classList.add('incoming');
-
-            let contentHtml = `<div class="message-info">${data.user}</div>`;
-            contentHtml += `<div>${data.msg}</div>`;
-            contentHtml += `<div class="message-time">${data.time}</div>`;
-            item.innerHTML = contentHtml;
-            messages.appendChild(item);
-        }
-
-        socket.on('error', function(err) {
-            showToast("⛔ " + err, true); // เปลี่ยน alert เป็น showToast
-            if(err.includes('ดีดออก')) {
-                setTimeout(() => location.reload(), 2000); // รอ 2 วิค่อยรีโหลด
+                socket.emit('join room', { username: myUsername, room: roomInput.value, password: passwordInput.value });
             }
         });
 
         socket.on('system message', function(msg) {
-            loginScreen.style.display = 'none';
-            appScreen.style.display = 'flex';
-            roomDisplay.textContent = roomInput.value; 
-
-            var item = document.createElement('li');
-            item.classList.add('system-msg');
-            item.textContent = msg;
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight;
-        });
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit('chat message', input.value);
-                input.value = '';
-            }
+            loginScreen.style.display = 'none'; appScreen.style.display = 'flex';
+            var item = document.createElement('li'); item.style.textAlign = 'center'; item.innerText = msg; messages.appendChild(item);
         });
 
         socket.on('chat message', function(data) {
-            renderMessage(data);
-            messages.scrollTop = messages.scrollHeight; 
+           var item = document.createElement('li');
+           item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
+           if(data.type === 'image') { item.innerHTML = `<b>${data.user}</b><br><img src="${data.img}" class="chat-image">`; } 
+           else { item.innerHTML = `<b>${data.user}</b><br>${data.msg}`; }
+           messages.appendChild(item);
         });
+
+        form.addEventListener('submit', function(e) { e.preventDefault(); if (input.value) { socket.emit('chat message', input.value); input.value = ''; } });
+        fileInput.addEventListener('change', function() { /* โค้ดส่งรูปเดิม */ });
     </script>
 </body>
 </html>
