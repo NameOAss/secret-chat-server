@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Secret Chat (Turbo)</title>
+    <title>Super Secret Chat (Fixed)</title>
     <style>
-        /* --- CSS ตกแต่ง (เหมือนเดิม) --- */
+        /* --- CSS ตกแต่ง --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: #121212; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; height: 100vh; display: flex; justify-content: center; overflow: hidden; }
 
@@ -178,13 +178,11 @@
                     const img = new Image();
                     img.src = e.target.result;
                     img.onload = function() {
-                        // กำหนดขนาดสูงสุด (800px)
                         const maxWidth = 800;
                         const maxHeight = 800;
                         let width = img.width;
                         let height = img.height;
 
-                        // คำนวณอัตราส่วนเพื่อรักษาทรงภาพ
                         if (width > height) {
                             if (width > maxWidth) {
                                 height *= maxWidth / width;
@@ -197,17 +195,13 @@
                             }
                         }
 
-                        // วาดรูปลงบน Canvas เพื่อย่อ
                         const canvas = document.createElement('canvas');
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // แปลงเป็น JPEG คุณภาพ 70% (ไฟล์จะเล็กลงมาก!)
                         const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
-
-                        // ส่งข้อมูลแบบย่อแล้วไปให้ Server
                         socket.emit('chat image', compressedDataUrl);
                     };
                 };
@@ -216,6 +210,7 @@
             }
         });
 
+        // --- รับข้อความ (แก้ไขแล้ว) ---
         socket.on('chat message', function(data) {
             var item = document.createElement('li');
             item.classList.add('message-box');
@@ -227,7 +222,8 @@
             if (data.type === 'image') {
                 contentHtml += `<img src="${data.img}" class="chat-image">`;
             } else {
-                contentHtml += <div>${data.msg}</div>;
+                // *** ตรงนี้คือจุดที่แก้ไขแล้วครับ ***
+                contentHtml += `<div>${data.msg}</div>`;
             }
             contentHtml += `<div class="message-time">${data.time}</div>`;
             item.innerHTML = contentHtml;
