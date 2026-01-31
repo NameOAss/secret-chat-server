@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CHATkup</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>CHATkup</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* --- 🎨 THEME: Corporate Light (IT Service Desk) --- */
+        /* --- 🎨 THEME: Corporate Light (CHATkup Slim) --- */
         :root {
             --primary-blue: #0061f2;     
             --dark-blue: #162b75;        
@@ -71,11 +72,7 @@
         }
 
         .login-header { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 30px; }
-        
-        /* 🔥 แก้ไข 1: เปลี่ยนไอคอนเป็น Chat bubble */
         .login-icon { color: var(--primary-blue); width: 36px; height: 36px; } 
-        
-        /* 🔥 แก้ไข 2: เปลี่ยนชื่อเป็น CHATkup */
         .login-title { font-size: 1.8rem; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
 
         .login-input { 
@@ -98,7 +95,7 @@
         .dummy-link { color: var(--primary-blue); font-size: 0.9rem; text-decoration: none; cursor: pointer; }
         .dummy-link:hover { text-decoration: underline; }
 
-        /* --- Chat UI (Light Corporate Theme) --- */
+        /* --- Chat UI --- */
         .app-container { 
             width: 100%; max-width: 600px; 
             display: none; flex-direction: column; height: 100%; 
@@ -117,42 +114,39 @@
 
         #messages { 
             flex-grow: 1; overflow-y: auto; padding: 20px; 
-            list-style: none; display: flex; flex-direction: column; gap: 12px; 
+            list-style: none; display: flex; flex-direction: column; gap: 8px; /* ลดระยะห่างระหว่างกล่อง */
             overscroll-behavior: contain; background: var(--bg-gray);
-            align-items: flex-start; /* 🔥 จัดชิดซ้ายเป็นหลัก */
+            align-items: flex-start;
         }
         
-        /* 🔥 แก้ไข 3: ปรับกล่องข้อความให้พอดีคำ (Fit Content) */
+        /* 🔥 แก้ไขจุดที่ 1: ปรับกล่องข้อความให้บางลง (Slim) */
         .message-box { 
-            padding: 12px 16px; 
-            border-radius: 16px; 
-            max-width: 80%;             /* กว้างสุดไม่เกิน 80% */
-            width: fit-content;         /* 🔥 กว้างพอดีกับข้อความ */
+            padding: 8px 14px;          /* 🔥 ลด Padding บนล่างเหลือ 8px (เดิม 12px) */
+            border-radius: 14px; 
+            max-width: 80%;             
+            width: fit-content;         
             word-wrap: break-word; 
             font-size: 0.95rem; 
             white-space: pre-wrap; 
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            line-height: 1.5;
+            line-height: 1.4;           /* 🔥 ลดระยะห่างบรรทัด */
             position: relative;
         }
         
-        /* ข้อความเพื่อน (สีเทา) */
         .incoming { 
             background: var(--bubble-other); color: var(--text-other);
             align-self: flex-start; border-bottom-left-radius: 4px; 
         }
         
-        /* ข้อความเรา (สีน้ำเงิน) */
         .outgoing { 
             background: var(--bubble-me); color: var(--text-me);
-            align-self: flex-end; /* 🔥 จัดชิดขวา */
+            align-self: flex-end; 
             border-bottom-right-radius: 4px; 
         }
         
-        /* ชื่อคนส่ง */
-        .msg-user { font-size: 0.75rem; margin-bottom: 4px; font-weight: 600; opacity: 0.8; }
-        /* เวลา */
-        .msg-time { font-size: 0.65rem; text-align: right; margin-top: 4px; opacity: 0.7; }
+        /* 🔥 แก้ไขจุดที่ 2: ดึงชื่อและเวลาให้ชิดข้อความมากขึ้น */
+        .msg-user { font-size: 0.75rem; margin-bottom: 2px; font-weight: 600; opacity: 0.8; } /* ลด margin */
+        .msg-time { font-size: 0.65rem; text-align: right; margin-top: 2px; opacity: 0.7; }   /* ลด margin */
         
         .system-msg { 
             align-self: center; font-size: 0.75rem; color: #64748b; 
@@ -303,7 +297,7 @@
         function toggleFakeScreen() {
              if (fakeScreen.style.display === "flex") {
                 fakeScreen.style.display = "none";
-                document.title = "CHATkup"; // 🔥 เปลี่ยน Title ให้ตรง
+                document.title = "CHATkup"; 
             } else {
                 fakeScreen.style.display = "flex";
                 document.title = "System Update";
@@ -386,7 +380,6 @@
             var item = document.createElement('li');
             item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
             
-            // ปรับสี Link ให้เข้ากับธีม (ข้อความเรา = ลิงก์ขาว, ข้อความเพื่อน = ลิงก์น้ำเงิน)
             let linkColor = (data.user === myUsername) ? '#e0f2fe' : '#0061f2';
             let formattedMsg = data.msg.replace(/(https?:\/\/[^\s]+)/g, function(url) {
                 return `<a href="${url}" target="_blank" style="color:${linkColor};text-decoration:underline;">${url}</a>`;
