@@ -3,32 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IT Service Desk</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>CHATkup</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         /* --- 🎨 THEME: Corporate Light (IT Service Desk) --- */
         :root {
-            /* สีหลัก (Corporate Blue Palette) */
-            --primary-blue: #0061f2;     /* สีปุ่ม / สีข้อความเรา */
-            --dark-blue: #162b75;        /* สี Header / Login BG */
-            --bg-gray: #f1f5f9;          /* สีพื้นหลังภายนอก */
-            --chat-bg: #ffffff;          /* สีพื้นหลังแชท */
+            --primary-blue: #0061f2;     
+            --dark-blue: #162b75;        
+            --bg-gray: #f1f5f9;          
+            --chat-bg: #ffffff;          
             
-            /* สีข้อความ */
-            --text-main: #1e293b;        /* สีตัวหนังสือหลัก */
-            --text-muted: #64748b;       /* สีตัวหนังสือจาง */
+            --text-main: #1e293b;        
+            --text-muted: #64748b;       
             
-            /* กล่องข้อความ */
-            --bubble-me: #0061f2;        /* พื้นหลังข้อความเรา */
-            --text-me: #ffffff;          /* สีตัวหนังสือเรา */
-            --bubble-other: #f1f5f9;     /* พื้นหลังข้อความเพื่อน */
-            --text-other: #1e293b;       /* สีตัวหนังสือเพื่อน */
+            --bubble-me: #0061f2;        
+            --text-me: #ffffff;          
+            --bubble-other: #f1f5f9;     
+            --text-other: #1e293b;       
             
-            /* Input */
             --input-bg: #f8fafc;
             --input-border: #e2e8f0;
-
-            /* Login */
             --card-bg: #ffffff;
         }
 
@@ -78,8 +71,12 @@
         }
 
         .login-header { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 30px; }
-        .login-icon { color: var(--primary-blue); width: 32px; height: 32px; }
-        .login-title { font-size: 1.5rem; font-weight: 600; color: #0f172a; }
+        
+        /* 🔥 แก้ไข 1: เปลี่ยนไอคอนเป็น Chat bubble */
+        .login-icon { color: var(--primary-blue); width: 36px; height: 36px; } 
+        
+        /* 🔥 แก้ไข 2: เปลี่ยนชื่อเป็น CHATkup */
+        .login-title { font-size: 1.8rem; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
 
         .login-input { 
             width: 100%; padding: 14px 16px; margin-bottom: 16px; 
@@ -106,12 +103,12 @@
             width: 100%; max-width: 600px; 
             display: none; flex-direction: column; height: 100%; 
             background: var(--chat-bg); position: relative; 
-            box-shadow: 0 0 20px rgba(0,0,0,0.05); /* เงาบางๆ ให้ดูมีมิติ */
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
         }
         
         header { 
             padding: 15px 20px; 
-            background: var(--dark-blue); /* หัวเว็บสีน้ำเงินเข้ม */
+            background: var(--dark-blue);
             color: white;
             display: flex; justify-content: space-between; align-items: center; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -122,25 +119,34 @@
             flex-grow: 1; overflow-y: auto; padding: 20px; 
             list-style: none; display: flex; flex-direction: column; gap: 12px; 
             overscroll-behavior: contain; background: var(--bg-gray);
+            align-items: flex-start; /* 🔥 จัดชิดซ้ายเป็นหลัก */
         }
         
+        /* 🔥 แก้ไข 3: ปรับกล่องข้อความให้พอดีคำ (Fit Content) */
         .message-box { 
-            padding: 12px 16px; border-radius: 12px; max-width: 80%; 
-            word-wrap: break-word; font-size: 0.95rem; white-space: pre-wrap; 
+            padding: 12px 16px; 
+            border-radius: 16px; 
+            max-width: 80%;             /* กว้างสุดไม่เกิน 80% */
+            width: fit-content;         /* 🔥 กว้างพอดีกับข้อความ */
+            word-wrap: break-word; 
+            font-size: 0.95rem; 
+            white-space: pre-wrap; 
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
             line-height: 1.5;
+            position: relative;
         }
         
         /* ข้อความเพื่อน (สีเทา) */
         .incoming { 
             background: var(--bubble-other); color: var(--text-other);
-            align-self: flex-start; border-bottom-left-radius: 2px; 
+            align-self: flex-start; border-bottom-left-radius: 4px; 
         }
         
         /* ข้อความเรา (สีน้ำเงิน) */
         .outgoing { 
             background: var(--bubble-me); color: var(--text-me);
-            align-self: flex-end; border-bottom-right-radius: 2px; 
+            align-self: flex-end; /* 🔥 จัดชิดขวา */
+            border-bottom-right-radius: 4px; 
         }
         
         /* ชื่อคนส่ง */
@@ -150,7 +156,7 @@
         
         .system-msg { 
             align-self: center; font-size: 0.75rem; color: #64748b; 
-            background: #e2e8f0; padding: 6px 12px; border-radius: 20px; 
+            background: #e2e8f0; padding: 6px 12px; border-radius: 20px; width: auto;
         }
 
         #form { 
@@ -178,7 +184,6 @@
         }
         .icon-btn:hover { background: #0050c9; }
         
-        /* Watermark สีดำจางๆ สำหรับพื้นขาว */
         .watermark-container { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             pointer-events: none; z-index: 50; overflow: hidden; 
@@ -186,7 +191,7 @@
         }
         .watermark-text { 
             width: 200px; height: 100px; display: flex; align-items: center; justify-content: center; 
-            transform: rotate(-45deg); color: #000; opacity: 0.04; /* สีดำจางๆ */
+            transform: rotate(-45deg); color: #000; opacity: 0.04; 
             font-weight: bold; font-size: 14px; text-align: center;
         }
     </style>
@@ -206,9 +211,9 @@
         <div class="login-box">
             <div class="login-header">
                 <svg class="login-icon" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 3H4C2.89 3 2 3.89 2 5V17C2 18.11 2.89 19 4 19H9V21H15V19H20C21.11 19 22 18.11 22 17V5C22 3.89 21.11 3 20 3ZM20 17H4V5H20V17Z"></path>
+                    <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
                 </svg>
-                <div class="login-title">IT Service Desk</div>
+                <div class="login-title">CHATkup</div>
             </div>
 
             <input id="username-input" class="login-input" placeholder="ชื่อผู้ใช้งาน" autocomplete="off">
@@ -298,7 +303,7 @@
         function toggleFakeScreen() {
              if (fakeScreen.style.display === "flex") {
                 fakeScreen.style.display = "none";
-                document.title = "IT Service Desk";
+                document.title = "CHATkup"; // 🔥 เปลี่ยน Title ให้ตรง
             } else {
                 fakeScreen.style.display = "flex";
                 document.title = "System Update";
@@ -361,7 +366,6 @@
 
         socket.on('system message', function(msg) {
             loginScreen.style.display = 'none'; appScreen.style.display = 'flex';
-            // เปลี่ยน Header ให้โชว์ชื่อห้องแบบเนียนๆ
             roomDisplay.innerText = "Ticket ID: " + roomInput.value;
             var item = document.createElement('li');
             item.className = 'system-msg'; item.innerText = msg;
@@ -374,7 +378,7 @@
         function makeLink(text) {
             var urlRegex = /(https?:\/\/[^\s]+)/g;
             return text.replace(urlRegex, function(url) {
-                return '<a href="' + url + '" target="_blank" style="color:#0061f2;text-decoration:underline;">' + url + '</a>';
+                return '<a href="' + url + '" target="_blank" style="color:#e0f2fe;text-decoration:underline;">' + url + '</a>';
             });
         }
 
@@ -382,7 +386,7 @@
             var item = document.createElement('li');
             item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
             
-            // ปรับสี Link ให้เข้ากับธีม
+            // ปรับสี Link ให้เข้ากับธีม (ข้อความเรา = ลิงก์ขาว, ข้อความเพื่อน = ลิงก์น้ำเงิน)
             let linkColor = (data.user === myUsername) ? '#e0f2fe' : '#0061f2';
             let formattedMsg = data.msg.replace(/(https?:\/\/[^\s]+)/g, function(url) {
                 return `<a href="${url}" target="_blank" style="color:${linkColor};text-decoration:underline;">${url}</a>`;
