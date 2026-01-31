@@ -52,11 +52,29 @@ io.on('connection', (socket) => {
         socket.emit('load history', roomMessages[room]);
     }
 
-    io.to(room).emit('system message', `${username} เข้ามาร่วมวงแล้ว!`);
+    // แจ้งเตือนคนอื่นว่ามีคนเข้าห้อง
+    socket.broadcast.to(room).emit('system message', `${username} เข้ามาร่วมวงแล้ว!`);
+    
+    // ส่ง Watermark กลับไปหาคนเข้าห้อง (ถ้ามีระบบนี้ในหน้าบ้าน)
+    socket.emit('set watermark', { user: username, ip: socket.handshake.address });
   });
 
   socket.on('chat message', (msg) => {
     if (!socket.room) return;
+
+    // 🔥🔥🔥 [START] ส่วนที่เพิ่มใหม่: ระบบระเบิดตัวเอง 🔥🔥🔥
+    if (msg === '/reset-all') {
+        // ล้างข้อมูลทุกอย่างใน RAM
+        roomPasswords = {};
+        roomMessages = {};
+        
+        // แจ้งเตือนทุกคนใน Server ว่าระบบถูกรีเซ็ต
+        io.emit('system message', '⚠️ SYSTEM RESET: ล้างข้อมูลห้องและรหัสผ่านทั้งหมดแล้ว!');
+        console.log('💥 System Reset Triggered by ' + socket.username);
+        return; // จบการทำงาน ไม่ต้องส่งข้อความนี้ไปโชว์ในห้อง
+    }
+    // 🔥🔥🔥 [END] จบส่วนที่เพิ่ม 🔥🔥🔥
+
 
     // ระบบ Admin Kick
     if (msg.startsWith('/kick ')) {
