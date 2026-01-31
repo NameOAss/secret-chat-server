@@ -1,24 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite Chat</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>IT Service Desk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS Theme (Neon Dark) --- */
+        /* --- 🎨 THEME: Corporate Light (IT Service Desk) --- */
         :root {
-            --bg-color: #0f0f12; --container-bg: #18181b;
-            --primary-color: #6366f1; --secondary-color: #8b5cf6;
-            --text-primary: #f3f4f6; --text-secondary: #9ca3af;
-            --incoming-bg: #27272a; --border-color: #3f3f46;
-            --error-color: #ef4444;
+            /* สีหลัก (Corporate Blue Palette) */
+            --primary-blue: #0061f2;     /* สีปุ่ม / สีข้อความเรา */
+            --dark-blue: #162b75;        /* สี Header / Login BG */
+            --bg-gray: #f1f5f9;          /* สีพื้นหลังภายนอก */
+            --chat-bg: #ffffff;          /* สีพื้นหลังแชท */
+            
+            /* สีข้อความ */
+            --text-main: #1e293b;        /* สีตัวหนังสือหลัก */
+            --text-muted: #64748b;       /* สีตัวหนังสือจาง */
+            
+            /* กล่องข้อความ */
+            --bubble-me: #0061f2;        /* พื้นหลังข้อความเรา */
+            --text-me: #ffffff;          /* สีตัวหนังสือเรา */
+            --bubble-other: #f1f5f9;     /* พื้นหลังข้อความเพื่อน */
+            --text-other: #1e293b;       /* สีตัวหนังสือเพื่อน */
+            
+            /* Input */
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+
+            /* Login */
+            --card-bg: #ffffff;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
-            background-color: var(--bg-color); color: var(--text-primary); 
-            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-gray); 
+            color: var(--text-main); 
+            font-family: 'Prompt', 'Inter', sans-serif;
             height: 100dvh; width: 100vw;
             display: flex; justify-content: center; overflow: hidden; 
         }
@@ -38,59 +57,138 @@
 
         /* UI Elements */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; width: 90%; pointer-events: none; }
-        .toast { background: rgba(30, 30, 36, 0.95); border: 1px solid var(--border-color); color: white; padding: 12px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; font-size: 0.9rem;}
+        .toast { background: rgba(0, 0, 0, 0.8); color: white; padding: 12px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; font-size: 0.9rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .toast.show { opacity: 1; }
-        .toast.error { border-color: var(--error-color); color: var(--error-color); }
+        .toast.error { background: #ef4444; }
 
-        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e1e24 0%, #0f0f12 100%); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .login-box { width: 100%; max-width: 350px; background: var(--container-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--border-color); text-align: center; }
-        .login-input { width: 100%; padding: 15px; margin-bottom: 15px; background: #27272a; border: 1px solid var(--border-color); color: white; border-radius: 12px; outline: none; font-size: 1rem;}
-        #login-btn { width: 100%; padding: 15px; background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); border: none; color: white; border-radius: 12px; font-weight: bold; font-size: 1.1rem;}
-
-        .app-container { width: 100%; max-width: 600px; display: none; flex-direction: column; height: 100%; background: var(--container-bg); position: relative; }
-        header { padding: 15px; background: #111; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        #messages { flex-grow: 1; overflow-y: auto; padding: 15px; list-style: none; display: flex; flex-direction: column; gap: 10px; overscroll-behavior: contain;}
+        /* --- Login Screen --- */
+        #login-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: var(--dark-blue);
+            z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; 
+        }
         
-        /* 🔥 แก้ไข CSS กล่องข้อความให้รองรับบรรทัดใหม่ */
+        .login-box { 
+            width: 100%; max-width: 400px; 
+            background: var(--card-bg); 
+            padding: 40px 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-align: center; 
+        }
+
+        .login-header { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 30px; }
+        .login-icon { color: var(--primary-blue); width: 32px; height: 32px; }
+        .login-title { font-size: 1.5rem; font-weight: 600; color: #0f172a; }
+
+        .login-input { 
+            width: 100%; padding: 14px 16px; margin-bottom: 16px; 
+            background: #fff; border: 1px solid #cbd5e1; color: #334155; 
+            border-radius: 8px; outline: none; font-size: 1rem; transition: all 0.2s;
+        }
+        .login-input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(0, 97, 242, 0.1); }
+        .login-input::placeholder { color: #94a3b8; }
+
+        #login-btn { 
+            width: 100%; padding: 14px; background-color: var(--primary-blue); 
+            border: none; color: white; border-radius: 30px; 
+            font-weight: 500; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; margin-top: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        #login-btn:hover { background-color: #0050c9; }
+
+        .divider { border-top: 1px solid #e2e8f0; margin: 25px 0 20px 0; }
+        .dummy-link { color: var(--primary-blue); font-size: 0.9rem; text-decoration: none; cursor: pointer; }
+        .dummy-link:hover { text-decoration: underline; }
+
+        /* --- Chat UI (Light Corporate Theme) --- */
+        .app-container { 
+            width: 100%; max-width: 600px; 
+            display: none; flex-direction: column; height: 100%; 
+            background: var(--chat-bg); position: relative; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.05); /* เงาบางๆ ให้ดูมีมิติ */
+        }
+        
+        header { 
+            padding: 15px 20px; 
+            background: var(--dark-blue); /* หัวเว็บสีน้ำเงินเข้ม */
+            color: white;
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0; z-index: 10;
+        }
+
+        #messages { 
+            flex-grow: 1; overflow-y: auto; padding: 20px; 
+            list-style: none; display: flex; flex-direction: column; gap: 12px; 
+            overscroll-behavior: contain; background: var(--bg-gray);
+        }
+        
         .message-box { 
-            padding: 10px 15px; 
-            border-radius: 15px; 
-            max-width: 85%; 
-            word-wrap: break-word; 
-            font-size: 0.95rem; 
-            white-space: pre-wrap; /* สำคัญ: ทำให้แสดงการเว้นบรรทัด */
+            padding: 12px 16px; border-radius: 12px; max-width: 80%; 
+            word-wrap: break-word; font-size: 0.95rem; white-space: pre-wrap; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            line-height: 1.5;
         }
         
-        .incoming { background: var(--incoming-bg); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .outgoing { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); align-self: flex-end; border-bottom-right-radius: 4px; color: white; }
-        .system-msg { align-self: center; font-size: 0.75rem; color: #666; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; }
+        /* ข้อความเพื่อน (สีเทา) */
+        .incoming { 
+            background: var(--bubble-other); color: var(--text-other);
+            align-self: flex-start; border-bottom-left-radius: 2px; 
+        }
+        
+        /* ข้อความเรา (สีน้ำเงิน) */
+        .outgoing { 
+            background: var(--bubble-me); color: var(--text-me);
+            align-self: flex-end; border-bottom-right-radius: 2px; 
+        }
+        
+        /* ชื่อคนส่ง */
+        .msg-user { font-size: 0.75rem; margin-bottom: 4px; font-weight: 600; opacity: 0.8; }
+        /* เวลา */
+        .msg-time { font-size: 0.65rem; text-align: right; margin-top: 4px; opacity: 0.7; }
+        
+        .system-msg { 
+            align-self: center; font-size: 0.75rem; color: #64748b; 
+            background: #e2e8f0; padding: 6px 12px; border-radius: 20px; 
+        }
 
-        /* 🔥 แก้ไข Form ให้รองรับ Textarea ที่ยืดหดได้ */
-        #form { display: flex; padding: 10px; background: #111; border-top: 1px solid var(--border-color); align-items: flex-end; gap: 8px; width: 100%; flex-shrink: 0; }
-        
-        /* เปลี่ยน Input เป็น Textarea */
-        #input { 
-            flex-grow: 1; 
-            padding: 12px 15px; 
-            border-radius: 20px; 
-            border: 1px solid var(--border-color); 
-            background: #27272a; 
-            color: white; 
-            outline: none; 
-            font-size: 1rem; 
-            min-width: 0; 
-            font-family: inherit;
-            resize: none; /* ห้าม User ดึงเอง */
-            height: 46px; /* ความสูงเริ่มต้น */
-            max-height: 120px; /* สูงสุด */
-            overflow-y: auto;
-            line-height: 1.4;
+        #form { 
+            display: flex; padding: 15px; 
+            background: white; border-top: 1px solid #e2e8f0; 
+            align-items: flex-end; gap: 10px; width: 100%; flex-shrink: 0; 
         }
         
-        .icon-btn { background: linear-gradient(to right, var(--primary-color), var(--secondary-color)); border: none; color: white; cursor: pointer; width: 45px; height: 45px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; margin-bottom: 1px; }
+        #input { 
+            flex-grow: 1; padding: 12px 15px; 
+            border-radius: 24px; border: 1px solid #cbd5e1; 
+            background: var(--input-bg); color: var(--text-main); 
+            outline: none; font-size: 1rem; min-width: 0; 
+            font-family: inherit; resize: none; height: 48px; max-height: 120px; 
+            overflow-y: auto; line-height: 1.4; 
+        }
+        #input:focus { border-color: var(--primary-blue); }
         
-        .watermark-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; overflow: hidden; opacity: 0.08; display: flex; flex-wrap: wrap; }
-        .watermark-text { width: 200px; height: 100px; display: flex; align-items: center; justify-content: center; transform: rotate(-45deg); color: #fff; font-weight: bold; font-size: 14px; text-align: center;}
+        .icon-btn { 
+            background: var(--primary-blue); border: none; color: white; 
+            cursor: pointer; width: 48px; height: 48px; flex-shrink: 0; 
+            display: flex; justify-content: center; align-items: center; 
+            border-radius: 50%; margin-bottom: 0px; 
+            transition: background 0.2s;
+        }
+        .icon-btn:hover { background: #0050c9; }
+        
+        /* Watermark สีดำจางๆ สำหรับพื้นขาว */
+        .watermark-container { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            pointer-events: none; z-index: 50; overflow: hidden; 
+            display: flex; flex-wrap: wrap; 
+        }
+        .watermark-text { 
+            width: 200px; height: 100px; display: flex; align-items: center; justify-content: center; 
+            transform: rotate(-45deg); color: #000; opacity: 0.04; /* สีดำจางๆ */
+            font-weight: bold; font-size: 14px; text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -106,22 +204,39 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="color: white; margin-bottom: 20px;">SECURE CHAT</h2>
-            <input id="username-input" class="login-input" placeholder="Codename" autocomplete="off">
-            <input id="room-input" class="login-input" placeholder="Room ID" autocomplete="off">
-            <input id="password-input" class="login-input" type="password" placeholder="Password" autocomplete="off">
-            <button id="login-btn">ENTER ROOM</button>
+            <div class="login-header">
+                <svg class="login-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 3H4C2.89 3 2 3.89 2 5V17C2 18.11 2.89 19 4 19H9V21H15V19H20C21.11 19 22 18.11 22 17V5C22 3.89 21.11 3 20 3ZM20 17H4V5H20V17Z"></path>
+                </svg>
+                <div class="login-title">IT Service Desk</div>
+            </div>
+
+            <input id="username-input" class="login-input" placeholder="ชื่อผู้ใช้งาน" autocomplete="off">
+            <input id="room-input" class="login-input" placeholder="Ticket ID / หมายเลขห้อง" autocomplete="off">
+            <input id="password-input" class="login-input" type="password" placeholder="รหัสผ่าน" autocomplete="off">
+            
+            <button id="login-btn">เข้าสู่ระบบ</button>
+
+            <div class="divider"></div>
+            <a class="dummy-link" onclick="alert('กรุณาติดต่อ Admin เพื่อขอสิทธิ์')">แจ้งปัญหาการใช้งาน</a>
         </div>
     </div>
 
     <div class="app-container" id="app">
         <header>
-            <span id="room-display" style="color: white; font-weight: bold;">LOBBY</span>
-            <span style="font-size: 0.8rem; color: #aaa;">🟢 Online</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+                <span id="room-display" style="font-weight: 600; font-size: 1rem;">Support Ticket</span>
+            </div>
+            <span style="font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px;">
+                🟢 Active
+            </span>
         </header>
+        
         <ul id="messages"></ul>
+        
         <form id="form" action="">
-            <textarea id="input" rows="1" placeholder="Type a message..."></textarea>
+            <textarea id="input" rows="1" placeholder="พิมพ์ข้อความตอบกลับ..."></textarea>
             <button class="icon-btn" id="send-btn">
                 <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
             </button>
@@ -138,7 +253,7 @@
         var appScreen = document.getElementById('app');
         var messages = document.getElementById('messages');
         var form = document.getElementById('form');
-        var input = document.getElementById('input'); // ตอนนี้คือ textarea แล้ว
+        var input = document.getElementById('input');
         var roomDisplay = document.getElementById('room-display');
         var usernameInput = document.getElementById('username-input');
         var roomInput = document.getElementById('room-input');
@@ -183,7 +298,7 @@
         function toggleFakeScreen() {
              if (fakeScreen.style.display === "flex") {
                 fakeScreen.style.display = "none";
-                document.title = "Lite Chat";
+                document.title = "IT Service Desk";
             } else {
                 fakeScreen.style.display = "flex";
                 document.title = "System Update";
@@ -224,23 +339,19 @@
                 myUsername = u;
                 socket.emit('join room', { username: u, room: r, password: p });
             } else {
-                showToast("⚠️ กรุณาใส่ชื่อและห้อง", true);
+                showToast("⚠️ กรุณากรอกข้อมูลให้ครบถ้วน", true);
             }
         });
 
-        // 🔥 Auto-resize Textarea & Handle Keydown
         input.addEventListener('input', function() {
-            this.style.height = 'auto'; // Reset height
-            this.style.height = (this.scrollHeight) + 'px'; // Expand to content
-            if(this.value === '') this.style.height = '46px'; // Default height
-            
+            this.style.height = 'auto'; 
+            this.style.height = (this.scrollHeight) + 'px';
+            if(this.value === '') this.style.height = '48px';
             localStorage.setItem('last_active_time', new Date().getTime());
         });
 
         input.addEventListener('keydown', function(e) {
-            // ถ้ากด Enter (โดยไม่กด Shift) บนคอมพิวเตอร์ -> ส่งข้อความ
             if (e.key === 'Enter' && !e.shiftKey) {
-                // เช็คขนาดหน้าจอ (ถ้าเป็นจอมือถือจะยอมให้กด Enter เพื่อขึ้นบรรทัดใหม่ได้ง่ายกว่า)
                 if (window.innerWidth > 768) { 
                     e.preventDefault();
                     sendMessage();
@@ -250,7 +361,8 @@
 
         socket.on('system message', function(msg) {
             loginScreen.style.display = 'none'; appScreen.style.display = 'flex';
-            roomDisplay.innerText = roomInput.value;
+            // เปลี่ยน Header ให้โชว์ชื่อห้องแบบเนียนๆ
+            roomDisplay.innerText = "Ticket ID: " + roomInput.value;
             var item = document.createElement('li');
             item.className = 'system-msg'; item.innerText = msg;
             messages.appendChild(item);
@@ -262,27 +374,32 @@
         function makeLink(text) {
             var urlRegex = /(https?:\/\/[^\s]+)/g;
             return text.replace(urlRegex, function(url) {
-                return '<a href="' + url + '" target="_blank" style="color:#38bdf8;text-decoration:underline;">' + url + '</a>';
+                return '<a href="' + url + '" target="_blank" style="color:#0061f2;text-decoration:underline;">' + url + '</a>';
             });
         }
 
         socket.on('chat message', function(data) {
             var item = document.createElement('li');
             item.className = 'message-box ' + (data.user === myUsername ? 'outgoing' : 'incoming');
+            
+            // ปรับสี Link ให้เข้ากับธีม
+            let linkColor = (data.user === myUsername) ? '#e0f2fe' : '#0061f2';
+            let formattedMsg = data.msg.replace(/(https?:\/\/[^\s]+)/g, function(url) {
+                return `<a href="${url}" target="_blank" style="color:${linkColor};text-decoration:underline;">${url}</a>`;
+            });
+
             if (data.type === 'text') {
-                 // ใส่ pre-wrap ใน CSS แล้ว ไม่ต้องเปลี่ยนอะไรตรงนี้มาก แค่ให้แน่ใจว่ามัน render text
-                 item.innerHTML = `<div style="font-size:0.75rem;opacity:0.8;margin-bottom:2px;">${data.user}</div>` + makeLink(data.msg) + `<div style="font-size:0.6rem;opacity:0.5;text-align:right;margin-top:5px;">${data.time}</div>`;
+                 item.innerHTML = `<div class="msg-user">${data.user}</div>` + formattedMsg + `<div class="msg-time">${data.time}</div>`;
                  messages.appendChild(item);
                  messages.scrollTop = messages.scrollHeight;
             }
         });
 
-        // 🔥 ฟังก์ชันส่งข้อความแยกออกมา
         function sendMessage() {
-            if (input.value.trim()) { // trim() กันส่งข้อความเปล่าๆ
+            if (input.value.trim()) { 
                 socket.emit('chat message', input.value);
                 input.value = '';
-                input.style.height = '46px'; // Reset ความสูง
+                input.style.height = '48px'; 
                 localStorage.setItem('last_active_time', new Date().getTime());
                 setTimeout(() => input.focus(), 10); 
             }
